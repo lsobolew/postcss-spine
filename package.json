@@ -1,7 +1,7 @@
 {
     "name": "postcss-spine",
     "version": "0.0.0",
-    "description": "PostCSS plugin generates "layout only" css",
+    "description": "PostCSS plugin generates \"layout only\" css",
     "keywords": ["postcss", "css", "postcss-plugin", "layout", "paint"],
     "author": "Łukasz Sobolewski <lukasz.sobolewski@getresponse.com>",
     "license": "MIT",
