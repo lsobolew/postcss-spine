@@ -15,10 +15,8 @@ var test = function (input, output, opts, done) {
 
 describe('postcss-spine', function () {
 
-    /* Write tests here
-
     it('does something', function (done) {
-        test('a{ }', 'a{ }', { }, done);
-    });*/
+        test('a{ background-color:red }', 'a{ background-color:#fff }', { fallback:true }, done);
+    });
 
 });
