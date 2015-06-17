@@ -1,24 +1,32 @@
 {
-    "name": "postcss-spine",
-    "version": "0.0.0",
-    "description": "PostCSS plugin generates \"layout only\" css",
-    "keywords": ["postcss", "css", "postcss-plugin", "layout", "paint"],
-    "author": "Łukasz Sobolewski <lukasz.sobolewski@getresponse.com>",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url":  "https://github.com/lsobolew/postcss-spine.git"
-    },
-    "dependencies": {
-        "postcss": "^4.1.9"
-    },
-    "devDependencies": {
-        "gulp-eslint": "^0.12.0",
-        "gulp-mocha":  "^2.0.1",
-        "chai":        "^2.3.0",
-        "gulp":        "^3.8.11"
-    },
-    "scripts": {
-        "test": "gulp"
-    }
+  "name": "postcss-spine",
+  "version": "0.0.0",
+  "description": "PostCSS plugin generates \"layout only\" css",
+  "keywords": [
+    "postcss",
+    "css",
+    "postcss-plugin",
+    "layout",
+    "paint"
+  ],
+  "author": "Łukasz Sobolewski <lukasz.sobolewski@getresponse.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lsobolew/postcss-spine.git"
+  },
+  "dependencies": {
+    "css-color-names": "0.0.1",
+    "extend": "^2.0.1",
+    "postcss": "^4.1.9"
+  },
+  "devDependencies": {
+    "gulp-eslint": "^0.12.0",
+    "gulp-mocha": "^2.0.1",
+    "chai": "^2.3.0",
+    "gulp": "^3.8.11"
+  },
+  "scripts": {
+    "test": "gulp"
+  }
 }
