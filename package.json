@@ -1,13 +1,14 @@
 {
   "name": "postcss-spine",
   "version": "0.0.0",
-  "description": "PostCSS plugin generates \"layout only\" css",
+  "description": "PostCSS plugin that removes all 'paint only' css rules",
   "keywords": [
     "postcss",
     "css",
     "postcss-plugin",
     "layout",
-    "paint"
+    "paint",
+    "repaint"
   ],
   "author": "Łukasz Sobolewski <lukasz.sobolewski@getresponse.com>",
   "license": "MIT",
@@ -17,7 +18,10 @@
   },
   "dependencies": {
     "css-color-names": "0.0.1",
+    "css-shorthand-expand": "^1.0.1",
+    "css-shorthand-properties": "^1.0.0",
     "extend": "^2.0.1",
+    "mocha": "^2.2.5",
     "postcss": "^4.1.9"
   },
   "devDependencies": {
