@@ -51,4 +51,20 @@ describe('postcss-spine', function () {
         test('a { box-shadow: 0 0 10px 0 red }', 'a { }', { }, done);
     });
 
+    it('removes outline-offset', function (done) {
+        test('a { outline-offset: 10px }', 'a { }', { }, done);
+    });
+
+    it('removes color', function (done) {
+        test('a { color: pink }', 'a { }', { }, done);
+    });
+
+    it('removes text-shadow', function (done) {
+        test('a { text-shadow: 1px 1px red }', 'a { }', { }, done);
+    });
+
+    it('adds border-color to complementary css', function (done) {
+        test('a { border: 2px dashed green }', 'a { border-color: green }', { complementary: true }, done);
+    });
+
 });
