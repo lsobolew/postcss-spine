@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spine only · postcss-spine demo</title>
+  <style>
+  .demo-bar{position:sticky;top:0;z-index:1000;display:flex;flex-wrap:wrap;gap:16px;
+    align-items:center;justify-content:space-between;padding:10px 20px;font:600 14px/1.2
+    ui-monospace,SFMono-Regular,Menlo,monospace;color:#e8e8f5;background:#171728;
+    border-bottom:1px solid #2b2b45}
+  .demo-bar__title{opacity:.7}
+  .demo-bar nav{display:flex;gap:6px;flex-wrap:wrap}
+  .demo-bar a{padding:6px 12px;border-radius:8px;color:#cfcfe6;text-decoration:none}
+  .demo-bar a:hover{background:#242440}
+  .demo-bar a.is-active{background:#6d5efc;color:#fff}
+</style>
+  <link rel="stylesheet" href="spine.css" />
+</head>
+<body>
+<div class="demo-bar">
+  <span class="demo-bar__title">postcss-spine demo</span>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="full.html">Full CSS</a>
+    <a href="spine.html" class="is-active">Spine only</a>
+    <a href="lazy.html">Spine + lazy paint</a>
+  </nav>
+</div>
+<div class="demo-note">Only <code>spine.css</code> is loaded — every box keeps its final
+size and position, but all paint (colors, backgrounds, shadows, radii, animations) is gone.</div>
+<style>.demo-note{padding:12px 20px;background:#fff7d6;border-bottom:1px solid #ece0a0;
+font:14px/1.5 system-ui;color:#5b520e}.demo-note code{font-weight:700}</style>
+<header class="nav">
+  <div class="container nav__inner">
+    <a class="brand" href="#"><span class="brand__mark">◆</span> Spinal</a>
+    <nav class="nav__links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">Docs</a>
+      <a href="#faq">Blog</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost" href="#">Sign in</a>
+      <a class="btn btn--primary" href="#">Get started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="badge">New · v2.0</span>
+        <h1 class="hero__title">Ship the layout first, paint later.</h1>
+        <p class="hero__lead">
+          Spinal splits your CSS into a layout skeleton and its paint layer, so the page
+          settles at its final size instantly and the styling streams in without a single
+          pixel of layout shift.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="#">Start free</a>
+          <a class="btn btn--ghost btn--lg" href="#">Watch demo</a>
+        </div>
+        <ul class="hero__points">
+          <li>No layout shift</li>
+          <li>Faster first render</li>
+          <li>Drop-in PostCSS plugin</li>
+        </ul>
+      </div>
+      <div class="hero__art">
+        <div class="window">
+          <div class="window__bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+          <div class="window__body">
+            <div class="skel skel--tall"></div>
+            <div class="skel"></div>
+            <div class="skel"></div>
+            <div class="skel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="container stats__grid">
+      <div><div class="stat__num">2.4×</div><div class="stat__label">Faster first paint</div></div>
+      <div><div class="stat__num">0.00</div><div class="stat__label">Cumulative layout shift</div></div>
+      <div><div class="stat__num">18kb</div><div class="stat__label">Critical spine CSS</div></div>
+      <div><div class="stat__num">100%</div><div class="stat__label">Framework agnostic</div></div>
+    </div>
+  </section>
+
+  <section id="features" class="section features">
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Everything the browser needs, in the right order</h2>
+        <p class="section__sub">
+          Layout-affecting rules go first. Colors, shadows and animations follow when it
+          is cheap to add them.
+        </p>
+      </div>
+      <div class="features__grid">
+        <div class="card">
+          <div class="card__icon">🦴</div>
+          <h3 class="card__title">Layout spine</h3>
+          <p class="card__text">Widths, spacing, grids and typography metrics that fix every box in place.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">🎨</div>
+          <h3 class="card__title">Paint complement</h3>
+          <p class="card__text">Backgrounds, colors, shadows and radii, isolated into a lazily-loaded layer.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">⚡</div>
+          <h3 class="card__title">Zero reflow</h3>
+          <p class="card__text">Adding the complement only repaints — dimensions never change.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">🧩</div>
+          <h3 class="card__title">Border aware</h3>
+          <p class="card__text">Border widths stay in the spine; their colors move to the complement.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">🔌</div>
+          <h3 class="card__title">PostCSS native</h3>
+          <p class="card__text">A single plugin, two build passes. Works with any bundler.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">📦</div>
+          <h3 class="card__title">Tiny critical CSS</h3>
+          <p class="card__text">Inline just the spine and defer the rest for a lighter first byte.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="section pricing">
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Simple pricing</h2>
+        <p class="section__sub">Start free, upgrade when you ship.</p>
+      </div>
+      <div class="pricing__grid">
+        <div class="plan">
+          <div class="plan__name">Starter</div>
+          <div class="plan__price">$0<span>/mo</span></div>
+          <ul class="plan__list">
+            <li>1 project</li>
+            <li>Community support</li>
+            <li>Core plugin</li>
+          </ul>
+          <a class="btn btn--ghost" href="#">Choose Starter</a>
+        </div>
+        <div class="plan plan--featured">
+          <div class="plan__name">Pro</div>
+          <div class="plan__price">$19<span>/mo</span></div>
+          <ul class="plan__list">
+            <li>Unlimited projects</li>
+            <li>Priority support</li>
+            <li>Build analytics</li>
+          </ul>
+          <a class="btn btn--primary" href="#">Choose Pro</a>
+        </div>
+        <div class="plan">
+          <div class="plan__name">Team</div>
+          <div class="plan__price">$49<span>/mo</span></div>
+          <ul class="plan__list">
+            <li>Everything in Pro</li>
+            <li>SSO &amp; roles</li>
+            <li>Dedicated support</li>
+          </ul>
+          <a class="btn btn--ghost" href="#">Choose Team</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="cta__inner">
+        <div>
+          <div class="cta__title">Ready to render layout-first?</div>
+          <p>Add postcss-spine to your pipeline in minutes.</p>
+        </div>
+        <a class="btn btn--ghost btn--lg" href="#">Get started free</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="#"><span class="brand__mark">◆</span> Spinal</a>
+        <p style="margin-top: 12px; max-width: 24em">Layout-first CSS delivery for the modern web.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul><li>Features</li><li>Pricing</li><li>Changelog</li><li>Docs</li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li>About</li><li>Blog</li><li>Careers</li><li>Contact</li></ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul><li>Privacy</li><li>Terms</li><li>License</li></ul>
+      </div>
+    </div>
+    <div class="footer__bottom">© 2026 Spinal — a postcss-spine demo.</div>
+  </div>
+</footer>
+
+</body>
+</html>

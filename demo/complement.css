@@ -1,0 +1,375 @@
+/* ------------------------------------------------------------------ *
+ * Demo stylesheet for postcss-spine.
+ *
+ * A full marketing landing page with a lot of paint: gradients, shadows,
+ * rounded corners, colors, transitions, hover transforms and a keyframe
+ * animation. postcss-spine splits this into:
+ *   - spine.css       (layout only — locks in every box's dimensions)
+ *   - complement.css  (paint only — repaint, no reflow)
+ * ------------------------------------------------------------------ */
+
+:root {
+  --brand: #6d5efc;
+  --brand-dark: #4b3fd4;
+  --ink: #1b1b2b;
+  --muted: #5b5b74;
+  --line: #e7e7f0;
+  --bg: #ffffff;
+  --bg-alt: #f5f5fb;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow-sm: 0 1px 2px rgba(27, 27, 43, 0.08);
+  --shadow-md: 0 10px 30px rgba(27, 27, 43, 0.12);
+  --shadow-lg: 0 24px 60px rgba(77, 63, 212, 0.28);
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+}
+
+html {
+}
+
+body {
+  color: var(--ink);
+  background: var(--bg);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p {
+}
+
+.container {
+}
+
+/* --- Buttons ----------------------------------------------------- */
+
+.btn {
+  border-color: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn--primary {
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn--ghost {
+  color: var(--ink);
+  background: transparent;
+  border-color: var(--line);
+}
+
+.btn--ghost:hover {
+  background: var(--bg-alt);
+  transform: translateY(-1px);
+}
+
+.btn--lg {
+}
+
+/* --- Navigation -------------------------------------------------- */
+
+.nav {
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom-color: var(--line);
+}
+
+.nav__inner {
+}
+
+.brand {
+}
+
+.brand__mark {
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  border-radius: 9px;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav__links {
+  color: var(--muted);
+}
+
+.nav__links a {
+  transition: color 0.15s ease;
+}
+
+.nav__links a:hover {
+  color: var(--ink);
+}
+
+.nav__actions {
+}
+
+/* --- Hero -------------------------------------------------------- */
+
+.hero {
+  background: radial-gradient(1200px 400px at 80% -10%, rgba(109, 94, 252, 0.16), transparent),
+    var(--bg);
+}
+
+.hero__inner {
+}
+
+.badge {
+  color: var(--brand-dark);
+  background: rgba(109, 94, 252, 0.12);
+  border-radius: 999px;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+.hero__title {
+}
+
+.hero__lead {
+  color: var(--muted);
+}
+
+.hero__cta {
+}
+
+.hero__points {
+  color: var(--muted);
+}
+
+.hero__points li::before {
+  color: var(--brand);
+}
+
+.hero__art {
+  animation: float 6s ease-in-out infinite;
+}
+
+.window {
+  border-color: var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+.window__bar {
+  background: var(--bg-alt);
+  border-bottom-color: var(--line);
+}
+
+.dot {
+  border-radius: 50%;
+  background: #d9d9e6;
+}
+
+.window__body {
+}
+
+.skel {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(100deg, #eee 30%, #f6f6fb 50%, #eee 70%);
+}
+
+.skel--tall {
+}
+
+/* --- Stats ------------------------------------------------------- */
+
+.stats {
+  border-top-color: var(--line);
+  border-bottom-color: var(--line);
+  background: var(--bg-alt);
+}
+
+.stats__grid {
+}
+
+.stat__num {
+  color: var(--brand-dark);
+}
+
+.stat__label {
+  color: var(--muted);
+}
+
+/* --- Section headings ------------------------------------------- */
+
+.section {
+}
+
+.section__head {
+}
+
+.section__title {
+}
+
+.section__sub {
+  color: var(--muted);
+}
+
+/* --- Features ---------------------------------------------------- */
+
+.features__grid {
+}
+
+.card {
+  background: #fff;
+  border-color: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.card__icon {
+  background: rgba(109, 94, 252, 0.12);
+  border-radius: 12px;
+}
+
+.card__title {
+}
+
+.card__text {
+  color: var(--muted);
+}
+
+/* --- Pricing ----------------------------------------------------- */
+
+.pricing {
+  background: var(--bg-alt);
+}
+
+.pricing__grid {
+}
+
+.plan {
+  background: #fff;
+  border-color: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.plan--featured {
+  border-color: var(--brand);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.03);
+}
+
+.plan__name {
+  color: var(--brand-dark);
+}
+
+.plan__price {
+}
+
+.plan__price span {
+  color: var(--muted);
+}
+
+.plan__list {
+}
+
+.plan__list li {
+  border-top-color: var(--line);
+  color: var(--muted);
+}
+
+.plan .btn {
+}
+
+/* --- CTA --------------------------------------------------------- */
+
+.cta__inner {
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+}
+
+.cta__title {
+}
+
+.cta .btn--ghost {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* --- Footer ------------------------------------------------------ */
+
+.footer {
+  color: var(--muted);
+  border-top-color: var(--line);
+}
+
+.footer__grid {
+}
+
+.footer h4 {
+  color: var(--ink);
+}
+
+.footer ul {
+}
+
+.footer__bottom {
+  border-top-color: var(--line);
+}
+
+/* --- Keyframes --------------------------------------------------- */
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@media (max-width: 900px) {
+  .hero__inner,
+  .stats__grid,
+  .features__grid,
+  .pricing__grid,
+  .footer__grid {
+  }
+
+  .hero__title {
+  }
+}

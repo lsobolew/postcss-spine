@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spine + lazy paint · postcss-spine demo</title>
+  <style>
+  .demo-bar{position:sticky;top:0;z-index:1000;display:flex;flex-wrap:wrap;gap:16px;
+    align-items:center;justify-content:space-between;padding:10px 20px;font:600 14px/1.2
+    ui-monospace,SFMono-Regular,Menlo,monospace;color:#e8e8f5;background:#171728;
+    border-bottom:1px solid #2b2b45}
+  .demo-bar__title{opacity:.7}
+  .demo-bar nav{display:flex;gap:6px;flex-wrap:wrap}
+  .demo-bar a{padding:6px 12px;border-radius:8px;color:#cfcfe6;text-decoration:none}
+  .demo-bar a:hover{background:#242440}
+  .demo-bar a.is-active{background:#6d5efc;color:#fff}
+</style>
+  <style id="spine">
+/* ------------------------------------------------------------------ *
+ * Demo stylesheet for postcss-spine.
+ *
+ * A full marketing landing page with a lot of paint: gradients, shadows,
+ * rounded corners, colors, transitions, hover transforms and a keyframe
+ * animation. postcss-spine splits this into:
+ *   - spine.css       (layout only — locks in every box's dimensions)
+ *   - complement.css  (paint only — repaint, no reflow)
+ * ------------------------------------------------------------------ */
+
+:root {
+  --brand: #6d5efc;
+  --brand-dark: #4b3fd4;
+  --ink: #1b1b2b;
+  --muted: #5b5b74;
+  --line: #e7e7f0;
+  --bg: #ffffff;
+  --bg-alt: #f5f5fb;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow-sm: 0 1px 2px rgba(27, 27, 43, 0.08);
+  --shadow-md: 0 10px 30px rgba(27, 27, 43, 0.12);
+  --shadow-lg: 0 24px 60px rgba(77, 63, 212, 0.28);
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+/* --- Buttons ----------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid;
+}
+
+.btn--primary {
+}
+
+.btn--primary:hover {
+}
+
+.btn--ghost {
+}
+
+.btn--ghost:hover {
+}
+
+.btn--lg {
+  padding: 14px 26px;
+  font-size: 16px;
+}
+
+/* --- Navigation -------------------------------------------------- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid;
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  height: 68px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.brand__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.nav__links {
+  display: flex;
+  gap: var(--space-6);
+  margin-right: auto;
+  font-weight: 500;
+}
+
+.nav__links a {
+}
+
+.nav__links a:hover {
+}
+
+.nav__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* --- Hero -------------------------------------------------------- */
+
+.hero {
+  padding: var(--space-16) 0;
+}
+
+.hero__inner {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--space-16);
+  align-items: center;
+}
+
+.badge {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hero__title {
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+.hero__lead {
+  max-width: 30em;
+  margin-top: var(--space-6);
+  font-size: 19px;
+}
+
+.hero__cta {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.hero__points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.hero__points li::before {
+  content: "✓";
+  margin-right: 6px;
+  font-weight: 700;
+}
+
+.hero__art {
+}
+
+.window {
+  border: 1px solid;
+  overflow: hidden;
+}
+
+.window__bar {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid;
+}
+
+.dot {
+  width: 11px;
+  height: 11px;
+}
+
+.window__body {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.skel {
+  height: 56px;
+}
+
+.skel--tall {
+  grid-column: 1 / -1;
+  height: 120px;
+}
+
+/* --- Stats ------------------------------------------------------- */
+
+.stats {
+  padding: var(--space-12) 0;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+}
+
+.stats__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-8);
+  text-align: center;
+}
+
+.stat__num {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.stat__label {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+/* --- Section headings ------------------------------------------- */
+
+.section {
+  padding: var(--space-16) 0;
+}
+
+.section__head {
+  max-width: 40em;
+  margin: 0 auto var(--space-12);
+  text-align: center;
+}
+
+.section__title {
+  font-size: 38px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+
+.section__sub {
+  margin-top: var(--space-4);
+  font-size: 18px;
+}
+
+/* --- Features ---------------------------------------------------- */
+
+.features__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.card {
+  padding: var(--space-8);
+  border: 1px solid;
+}
+
+.card:hover {
+}
+
+.card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: var(--space-4);
+  font-size: 22px;
+}
+
+.card__title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.card__text {
+  margin-top: var(--space-2);
+  font-size: 15px;
+}
+
+/* --- Pricing ----------------------------------------------------- */
+
+.pricing {
+}
+
+.pricing__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.plan {
+  padding: var(--space-8);
+  border: 1px solid;
+}
+
+.plan--featured {
+}
+
+.plan__name {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.plan__price {
+  margin-top: var(--space-3);
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.plan__price span {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.plan__list {
+  margin: var(--space-6) 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+}
+
+.plan__list li {
+  padding: 8px 0;
+  border-top: 1px solid;
+}
+
+.plan .btn {
+  width: 100%;
+}
+
+/* --- CTA --------------------------------------------------------- */
+
+.cta__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: var(--space-12);
+}
+
+.cta__title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.cta .btn--ghost {
+}
+
+/* --- Footer ------------------------------------------------------ */
+
+.footer {
+  padding: var(--space-16) 0 var(--space-8);
+  border-top: 1px solid;
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-8);
+}
+
+.footer h4 {
+  margin: 0 0 var(--space-4);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.footer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 2.1;
+}
+
+.footer__bottom {
+  margin-top: var(--space-12);
+  padding-top: var(--space-6);
+  border-top: 1px solid;
+  font-size: 13px;
+}
+
+/* --- Keyframes --------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hero__inner,
+  .stats__grid,
+  .features__grid,
+  .pricing__grid,
+  .footer__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__title {
+    font-size: 40px;
+  }
+}
+
+  </style>
+  <style>
+    .demo-panel{position:fixed;right:16px;bottom:16px;z-index:1000;width:260px;padding:16px;
+      border-radius:14px;background:#171728;color:#e8e8f5;box-shadow:0 20px 50px rgba(0,0,0,.35);
+      font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .demo-panel h3{margin:0 0 4px;font-size:14px}
+    .demo-panel p{margin:0 0 12px;color:#a5a5c4}
+    .demo-panel button{width:100%;padding:10px;border:0;border-radius:9px;cursor:pointer;
+      font:600 14px system-ui;color:#fff;background:#6d5efc}
+    .demo-panel button:disabled{background:#2fae66;cursor:default}
+    .metric{display:flex;justify-content:space-between;margin-top:8px}
+    .metric__val{font-weight:700}
+    .metric__val.is-ok{color:#54e39a}.metric__val.is-bad{color:#ff8080}
+    #m-status{margin-top:12px;color:#a5a5c4;font-size:12px}
+  </style>
+</head>
+<body>
+<div class="demo-bar">
+  <span class="demo-bar__title">postcss-spine demo</span>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="full.html">Full CSS</a>
+    <a href="spine.html">Spine only</a>
+    <a href="lazy.html" class="is-active">Spine + lazy paint</a>
+  </nav>
+</div>
+<header class="nav">
+  <div class="container nav__inner">
+    <a class="brand" href="#"><span class="brand__mark">◆</span> Spinal</a>
+    <nav class="nav__links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">Docs</a>
+      <a href="#faq">Blog</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost" href="#">Sign in</a>
+      <a class="btn btn--primary" href="#">Get started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="badge">New · v2.0</span>
+        <h1 class="hero__title">Ship the layout first, paint later.</h1>
+        <p class="hero__lead">
+          Spinal splits your CSS into a layout skeleton and its paint layer, so the page
+          settles at its final size instantly and the styling streams in without a single
+          pixel of layout shift.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="#">Start free</a>
+          <a class="btn btn--ghost btn--lg" href="#">Watch demo</a>
+        </div>
+        <ul class="hero__points">
+          <li>No layout shift</li>
+          <li>Faster first render</li>
+          <li>Drop-in PostCSS plugin</li>
+        </ul>
+      </div>
+      <div class="hero__art">
+        <div class="window">
+          <div class="window__bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+          <div class="window__body">
+            <div class="skel skel--tall"></div>
+            <div class="skel"></div>
+            <div class="skel"></div>
+            <div class="skel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="container stats__grid">
+      <div><div class="stat__num">2.4×</div><div class="stat__label">Faster first paint</div></div>
+      <div><div class="stat__num">0.00</div><div class="stat__label">Cumulative layout shift</div></div>
+      <div><div class="stat__num">18kb</div><div class="stat__label">Critical spine CSS</div></div>
+      <div><div class="stat__num">100%</div><div class="stat__label">Framework agnostic</div></div>
+    </div>
+  </section>
+
+  <section id="features" class="section features">
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Everything the browser needs, in the right order</h2>
+        <p class="section__sub">
+          Layout-affecting rules go first. Colors, shadows and animations follow when it
+          is cheap to add them.
+        </p>
+      </div>
+      <div class="features__grid">
+        <div class="card">
+          <div class="card__icon">🦴</div>
+          <h3 class="card__title">Layout spine</h3>
+          <p class="card__text">Widths, spacing, grids and typography metrics that fix every box in place.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">🎨</div>
+          <h3 class="card__title">Paint complement</h3>
+          <p class="card__text">Backgrounds, colors, shadows and radii, isolated into a lazily-loaded layer.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">⚡</div>
+          <h3 class="card__title">Zero reflow</h3>
+          <p class="card__text">Adding the complement only repaints — dimensions never change.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">🧩</div>
+          <h3 class="card__title">Border aware</h3>
+          <p class="card__text">Border widths stay in the spine; their colors move to the complement.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">🔌</div>
+          <h3 class="card__title">PostCSS native</h3>
+          <p class="card__text">A single plugin, two build passes. Works with any bundler.</p>
+        </div>
+        <div class="card">
+          <div class="card__icon">📦</div>
+          <h3 class="card__title">Tiny critical CSS</h3>
+          <p class="card__text">Inline just the spine and defer the rest for a lighter first byte.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="section pricing">
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Simple pricing</h2>
+        <p class="section__sub">Start free, upgrade when you ship.</p>
+      </div>
+      <div class="pricing__grid">
+        <div class="plan">
+          <div class="plan__name">Starter</div>
+          <div class="plan__price">$0<span>/mo</span></div>
+          <ul class="plan__list">
+            <li>1 project</li>
+            <li>Community support</li>
+            <li>Core plugin</li>
+          </ul>
+          <a class="btn btn--ghost" href="#">Choose Starter</a>
+        </div>
+        <div class="plan plan--featured">
+          <div class="plan__name">Pro</div>
+          <div class="plan__price">$19<span>/mo</span></div>
+          <ul class="plan__list">
+            <li>Unlimited projects</li>
+            <li>Priority support</li>
+            <li>Build analytics</li>
+          </ul>
+          <a class="btn btn--primary" href="#">Choose Pro</a>
+        </div>
+        <div class="plan">
+          <div class="plan__name">Team</div>
+          <div class="plan__price">$49<span>/mo</span></div>
+          <ul class="plan__list">
+            <li>Everything in Pro</li>
+            <li>SSO &amp; roles</li>
+            <li>Dedicated support</li>
+          </ul>
+          <a class="btn btn--ghost" href="#">Choose Team</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="cta__inner">
+        <div>
+          <div class="cta__title">Ready to render layout-first?</div>
+          <p>Add postcss-spine to your pipeline in minutes.</p>
+        </div>
+        <a class="btn btn--ghost btn--lg" href="#">Get started free</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="#"><span class="brand__mark">◆</span> Spinal</a>
+        <p style="margin-top: 12px; max-width: 24em">Layout-first CSS delivery for the modern web.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul><li>Features</li><li>Pricing</li><li>Changelog</li><li>Docs</li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li>About</li><li>Blog</li><li>Careers</li><li>Contact</li></ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul><li>Privacy</li><li>Terms</li><li>License</li></ul>
+      </div>
+    </div>
+    <div class="footer__bottom">© 2026 Spinal — a postcss-spine demo.</div>
+  </div>
+</footer>
+
+<aside class="demo-panel">
+  <h3>Lazy paint</h3>
+  <p>Spine is inlined. Load the complement and watch the geometry stay put.</p>
+  <button id="load-btn">Load complement.css</button>
+  <div class="metric"><span>Max box shift</span><span id="m-shift" class="metric__val">—</span></div>
+  <div class="metric"><span>Browser CLS</span><span id="m-cls" class="metric__val">—</span></div>
+  <div id="m-status">Waiting…</div>
+</aside>
+<script src="assets/demo.js"></script>
+</body>
+</html>
