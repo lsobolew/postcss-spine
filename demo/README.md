@@ -64,6 +64,10 @@ two variants, discards warm-up runs, and prints median / mean / p95 / min / max
 / std-dev plus the median speed-up. Set `PUPPETEER_EXECUTABLE_PATH` if Chrome is
 not auto-detected. LCP is skipped (headless Chrome does not report it).
 
+A representative run is recorded in [`bench-results.md`](./bench-results.md):
+at 200 ms CSS latency over 1000 runs, FCP median was **244 ms (full) vs. 44 ms
+(spine)** — spine painted ~5.5× sooner.
+
 ## Rebuild
 
 `styles.css` (the full source) and `page.html` (shared markup) are the inputs;
