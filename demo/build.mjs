@@ -116,7 +116,7 @@ ${spineCss}
     .demo-panel p{margin:0 0 12px;color:#a5a5c4}
     .demo-panel button{width:100%;padding:10px;border:0;border-radius:9px;cursor:pointer;
       font:600 14px system-ui;color:#fff;background:#6d5efc}
-    .demo-panel button:disabled{background:#2fae66;cursor:default}
+    .demo-panel button.is-painted{background:#c8103e}
     .metric{display:flex;justify-content:space-between;margin-top:8px}
     .metric__val{font-weight:700}
     .metric__val.is-ok{color:#54e39a}.metric__val.is-bad{color:#ff8080}
@@ -125,9 +125,9 @@ ${spineCss}
 `
 const lazyPanel = `<aside class="demo-panel">
   <h3>Lazy paint</h3>
-  <p>Spine is inlined. Load the complement and watch the geometry stay put.</p>
+  <p>Spine is inlined. Toggle the complement on and off — the geometry stays put either way.</p>
   <button id="load-btn">Load complement.css</button>
-  <div class="metric"><span>Max box shift</span><span id="m-shift" class="metric__val">—</span></div>
+  <div class="metric"><span>Max reflow (layout)</span><span id="m-shift" class="metric__val">—</span></div>
   <div class="metric"><span>Browser CLS</span><span id="m-cls" class="metric__val">—</span></div>
   <div id="m-status">Waiting…</div>
 </aside>
