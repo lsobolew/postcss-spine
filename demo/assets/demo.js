@@ -18,7 +18,7 @@
         if (!e.hadRecentInput) cls += e.value
       })
     }).observe({ type: 'layout-shift', buffered: true })
-  } catch (e) {
+  } catch {
     /* layout-shift API unavailable */
   }
 

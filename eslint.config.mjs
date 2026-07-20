@@ -10,4 +10,24 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
+  // Node scripts (build tooling, config).
+  {
+    files: ['**/*.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', process: 'readonly' },
+    },
+  },
+  // Browser demo client script.
+  {
+    files: ['demo/assets/**/*.js'],
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        performance: 'readonly',
+        PerformanceObserver: 'readonly',
+        requestAnimationFrame: 'readonly',
+      },
+    },
+  },
 )

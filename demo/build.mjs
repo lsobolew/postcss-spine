@@ -28,7 +28,6 @@ const write = (f, s) => {
 
 const source = read('styles.css')
 const body = read('page.html')
-const clientJs = read('assets/demo.js')
 
 console.log('Splitting styles.css with postcss-spine…')
 const spineCss = (await postcss([spine()]).process(source, { from: undefined })).css
