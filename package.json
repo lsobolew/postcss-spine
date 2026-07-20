@@ -57,6 +57,7 @@
     "test:coverage": "vitest run --coverage",
     "demo:build": "npm run build && node demo/build.mjs",
     "demo:serve": "node demo/server.mjs",
+    "demo:bench": "node demo/bench.mjs",
     "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "peerDependencies": {
@@ -68,6 +69,7 @@
     "@vitest/coverage-v8": "^2.1.8",
     "eslint": "^9.17.0",
     "postcss": "^8.4.49",
+    "puppeteer-core": "^23.11.1",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.19.0",

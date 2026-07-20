@@ -47,6 +47,23 @@ explains the FCP gap, and **CLS**.
 > the tab focused for real FCP numbers. The render-blocking-CSS figure is derived
 > from resource timing and is shown regardless.
 
+## Benchmark
+
+`bench.mjs` renders each strategy many times in **headless Chrome** (via
+`puppeteer-core` + your installed Chrome) and reports First Contentful Paint
+statistics. Headless pages count as visible, so FCP is measured properly —
+unlike a backgrounded real tab, where Chrome defers it.
+
+```bash
+npm run demo:bench            # defaults: 300 runs, 200 ms CSS latency
+node demo/bench.mjs 1000 600  # 1000 runs at 600 ms latency
+```
+
+It starts its own server, delays only the CSS (never the HTML), interleaves the
+two variants, discards warm-up runs, and prints median / mean / p95 / min / max
+/ std-dev plus the median speed-up. Set `PUPPETEER_EXECUTABLE_PATH` if Chrome is
+not auto-detected. LCP is skipped (headless Chrome does not report it).
+
 ## Rebuild
 
 `styles.css` (the full source) and `page.html` (shared markup) are the inputs;
