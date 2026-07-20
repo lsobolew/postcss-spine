@@ -3,31 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Full CSS · postcss-spine demo</title>
-  <style>
-  .demo-bar{position:sticky;top:0;z-index:1000;display:flex;flex-wrap:wrap;gap:16px;
-    align-items:center;justify-content:space-between;padding:10px 20px;font:600 14px/1.2
-    ui-monospace,SFMono-Regular,Menlo,monospace;color:#e8e8f5;background:#171728;
-    border-bottom:1px solid #2b2b45}
-  .demo-bar__title{opacity:.7}
-  .demo-bar nav{display:flex;gap:6px;flex-wrap:wrap}
-  .demo-bar a{padding:6px 12px;border-radius:8px;color:#cfcfe6;text-decoration:none}
-  .demo-bar a:hover{background:#242440}
-  .demo-bar a.is-active{background:#6d5efc;color:#fff}
-</style>
-  <link rel="stylesheet" href="styles.css" />
+  <title>measure: full</title>
+  <script>window.__VARIANT="Full CSS (render-blocking)";</script>
+  <script>(function(){
+  var cls=0;
+  try{new PerformanceObserver(function(l){l.getEntries().forEach(function(e){if(!e.hadRecentInput)cls+=e.value;});}).observe({type:'layout-shift',buffered:true});}catch(e){}
+  function report(){
+    var paint=performance.getEntriesByType('paint').filter(function(e){return e.name==='first-contentful-paint';})[0];
+    var css=performance.getEntriesByType('resource').filter(function(e){return e.name.indexOf('styles.css')>-1;});
+    var blocking=css.reduce(function(m,e){return Math.max(m,e.responseEnd);},0);
+    parent.postMessage({__vitals:true,variant:window.__VARIANT,
+      fcp:paint?Math.round(paint.startTime):null,blocking:Math.round(blocking),
+      cls:cls,hidden:document.visibilityState!=='visible'},'*');
+  }
+  window.addEventListener('load',function(){setTimeout(report,1000);});
+})();</script>
+  <script>
+    (function(){var p=new URLSearchParams(location.search);var d=p.get('delay')||'0';var r=p.get('run')||'0';
+    document.write('<link rel="stylesheet" href="styles.css?delay='+d+'&run='+r+'">');})();
+  </script>
 </head>
 <body>
-<div class="demo-bar">
-  <span class="demo-bar__title">postcss-spine demo</span>
-  <nav>
-    <a href="index.html">Overview</a>
-    <a href="full.html" class="is-active">Full CSS</a>
-    <a href="spine.html">Spine only</a>
-    <a href="lazy.html">Spine + lazy paint</a>
-    <a href="vitals.html">Web Vitals</a>
-  </nav>
-</div>
 <header class="nav">
   <div class="container nav__inner">
     <a class="brand" href="#"><span class="brand__mark">◆</span> Spinal</a>

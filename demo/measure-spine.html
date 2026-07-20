@@ -3,20 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spine + lazy paint · postcss-spine demo</title>
-  <style>
-  .demo-bar{position:sticky;top:0;z-index:1000;display:flex;flex-wrap:wrap;gap:16px;
-    align-items:center;justify-content:space-between;padding:10px 20px;font:600 14px/1.2
-    ui-monospace,SFMono-Regular,Menlo,monospace;color:#e8e8f5;background:#171728;
-    border-bottom:1px solid #2b2b45}
-  .demo-bar__title{opacity:.7}
-  .demo-bar nav{display:flex;gap:6px;flex-wrap:wrap}
-  .demo-bar a{padding:6px 12px;border-radius:8px;color:#cfcfe6;text-decoration:none}
-  .demo-bar a:hover{background:#242440}
-  .demo-bar a.is-active{background:#6d5efc;color:#fff}
-</style>
-  <style id="spine">
-/* ------------------------------------------------------------------ *
+  <title>measure: spine</title>
+  <script>window.__VARIANT="Spine inlined + lazy complement";</script>
+  <script>(function(){
+  var cls=0;
+  try{new PerformanceObserver(function(l){l.getEntries().forEach(function(e){if(!e.hadRecentInput)cls+=e.value;});}).observe({type:'layout-shift',buffered:true});}catch(e){}
+  function report(){
+    var paint=performance.getEntriesByType('paint').filter(function(e){return e.name==='first-contentful-paint';})[0];
+    var css=performance.getEntriesByType('resource').filter(function(e){return e.name.indexOf('styles.css')>-1;});
+    var blocking=css.reduce(function(m,e){return Math.max(m,e.responseEnd);},0);
+    parent.postMessage({__vitals:true,variant:window.__VARIANT,
+      fcp:paint?Math.round(paint.startTime):null,blocking:Math.round(blocking),
+      cls:cls,hidden:document.visibilityState!=='visible'},'*');
+  }
+  window.addEventListener('load',function(){setTimeout(report,1000);});
+})();</script>
+  <style>/* ------------------------------------------------------------------ *
  * Demo stylesheet for postcss-spine.
  *
  * A full marketing landing page with a lot of paint: gradients, shadows,
@@ -467,34 +469,9 @@ p {
     font-size: 40px;
   }
 }
-
-  </style>
-  <style>
-    .demo-panel{position:fixed;right:16px;bottom:16px;z-index:1000;width:260px;padding:16px;
-      border-radius:14px;background:#171728;color:#e8e8f5;box-shadow:0 20px 50px rgba(0,0,0,.35);
-      font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
-    .demo-panel h3{margin:0 0 4px;font-size:14px}
-    .demo-panel p{margin:0 0 12px;color:#a5a5c4}
-    .demo-panel button{width:100%;padding:10px;border:0;border-radius:9px;cursor:pointer;
-      font:600 14px system-ui;color:#fff;background:#6d5efc}
-    .demo-panel button.is-painted{background:#c8103e}
-    .metric{display:flex;justify-content:space-between;margin-top:8px}
-    .metric__val{font-weight:700}
-    .metric__val.is-ok{color:#54e39a}.metric__val.is-bad{color:#ff8080}
-    #m-status{margin-top:12px;color:#a5a5c4;font-size:12px}
-  </style>
+</style>
 </head>
 <body>
-<div class="demo-bar">
-  <span class="demo-bar__title">postcss-spine demo</span>
-  <nav>
-    <a href="index.html">Overview</a>
-    <a href="full.html">Full CSS</a>
-    <a href="spine.html">Spine only</a>
-    <a href="lazy.html" class="is-active">Spine + lazy paint</a>
-    <a href="vitals.html">Web Vitals</a>
-  </nav>
-</div>
 <header class="nav">
   <div class="container nav__inner">
     <a class="brand" href="#"><span class="brand__mark">◆</span> Spinal</a>
@@ -679,14 +656,11 @@ p {
   </div>
 </footer>
 
-<aside class="demo-panel">
-  <h3>Lazy paint</h3>
-  <p>Spine is inlined. Toggle the complement on and off — the geometry stays put either way.</p>
-  <button id="load-btn">Load complement.css</button>
-  <div class="metric"><span>Max reflow (layout)</span><span id="m-shift" class="metric__val">—</span></div>
-  <div class="metric"><span>Browser CLS</span><span id="m-cls" class="metric__val">—</span></div>
-  <div id="m-status">Waiting…</div>
-</aside>
-<script src="assets/demo.js"></script>
+<script>
+  window.addEventListener('load',function(){var p=new URLSearchParams(location.search);
+  var d=p.get('delay')||'0';var r=p.get('run')||'0';
+  requestAnimationFrame(function(){var l=document.createElement('link');l.rel='stylesheet';
+  l.href='complement.css?delay='+d+'&run='+r;document.head.appendChild(l);});});
+</script>
 </body>
 </html>

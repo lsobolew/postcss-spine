@@ -24,6 +24,7 @@ body{margin:0;background:#fafafe}</style>
     <a href="full.html">Full CSS</a>
     <a href="spine.html">Spine only</a>
     <a href="lazy.html">Spine + lazy paint</a>
+    <a href="vitals.html">Web Vitals</a>
   </nav>
 </div>
 <style>
@@ -31,9 +32,9 @@ body{margin:0;background:#fafafe}</style>
   .ov h1{font-size:34px;letter-spacing:-.02em;margin:0 0 8px}
   .ov p.lead{font-size:18px;color:#5b5b74;margin:0 0 28px;max-width:60ch}
   .ov code{background:#f0f0f7;padding:2px 6px;border-radius:6px;font-size:.9em}
-  .ov__cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px}
+  .ov__cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
   .ov__card{padding:20px;border:1px solid #e7e7f0;border-radius:14px;background:#fff}
-  .ov__card h3{margin:0 0 6px;font-size:17px}
+  .ov__card h3{margin:0 0 6px;font-size:16px}
   .ov__card p{margin:0 0 14px;font-size:14px;color:#5b5b74}
   .ov__card a{display:inline-block;padding:8px 14px;border-radius:999px;background:#6d5efc;
     color:#fff;text-decoration:none;font-weight:600;font-size:14px}
@@ -52,6 +53,7 @@ body{margin:0;background:#fafafe}</style>
     <div class="ov__card"><h3>1 · Full CSS</h3><p>The original stylesheet, for reference.</p><a href="full.html">Open</a></div>
     <div class="ov__card"><h3>2 · Spine only</h3><p>Layout skeleton — geometry without paint.</p><a href="spine.html">Open</a></div>
     <div class="ov__card"><h3>3 · Spine + lazy paint</h3><p>Spine inlined, complement lazy-loaded, shift measured.</p><a href="lazy.html">Open</a></div>
+    <div class="ov__card"><h3>4 · Web Vitals</h3><p>FCP / LCP / CLS: spine-first vs. full stylesheet.</p><a href="vitals.html">Open</a></div>
   </div>
   <div class="ov__compare">
     <figure class="ov__frame" style="margin:0"><figcaption>Full CSS</figcaption><iframe src="full.html" title="Full"></iframe></figure>

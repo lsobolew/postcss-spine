@@ -56,6 +56,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "demo:build": "npm run build && node demo/build.mjs",
+    "demo:serve": "node demo/server.mjs",
     "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "peerDependencies": {

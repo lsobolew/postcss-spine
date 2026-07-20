@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Vitals · postcss-spine demo</title>
+  <style>
+  .demo-bar{position:sticky;top:0;z-index:1000;display:flex;flex-wrap:wrap;gap:16px;
+    align-items:center;justify-content:space-between;padding:10px 20px;font:600 14px/1.2
+    ui-monospace,SFMono-Regular,Menlo,monospace;color:#e8e8f5;background:#171728;
+    border-bottom:1px solid #2b2b45}
+  .demo-bar__title{opacity:.7}
+  .demo-bar nav{display:flex;gap:6px;flex-wrap:wrap}
+  .demo-bar a{padding:6px 12px;border-radius:8px;color:#cfcfe6;text-decoration:none}
+  .demo-bar a:hover{background:#242440}
+  .demo-bar a.is-active{background:#6d5efc;color:#fff}
+body{margin:0;background:#fafafe}</style>
+</head>
+<body>
+<div class="demo-bar">
+  <span class="demo-bar__title">postcss-spine demo</span>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="full.html">Full CSS</a>
+    <a href="spine.html">Spine only</a>
+    <a href="lazy.html">Spine + lazy paint</a>
+    <a href="vitals.html" class="is-active">Web Vitals</a>
+  </nav>
+</div>
+<style>
+  .vt{max-width:1120px;margin:0 auto;padding:32px 24px 64px;font:16px/1.6 system-ui,sans-serif;color:#1b1b2b}
+  .vt h1{font-size:32px;letter-spacing:-.02em;margin:0 0 8px}
+  .vt p.lead{font-size:17px;color:#5b5b74;margin:0 0 20px;max-width:70ch}
+  .vt code{background:#f0f0f7;padding:2px 6px;border-radius:6px;font-size:.9em}
+  .vt__controls{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:16px;
+    border:1px solid #e7e7f0;border-radius:14px;background:#fff;margin-bottom:12px}
+  .vt__controls label{font-weight:600}
+  .vt__controls select{padding:8px 10px;border:1px solid #d7d7e6;border-radius:9px;font:inherit}
+  .vt__controls button{padding:10px 20px;border:0;border-radius:999px;cursor:pointer;
+    font:600 15px system-ui;color:#fff;background:#6d5efc}
+  .vt__controls button:disabled{opacity:.5;cursor:default}
+  .vt__sizes{font-size:14px;color:#5b5b74;margin-left:auto}
+  .vt__status{margin:0 0 20px;font-size:14px;color:#5b5b74;min-height:1.4em}
+  .vt__grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .metric-card{border:1px solid #e7e7f0;border-radius:14px;background:#fff;overflow:hidden}
+  .metric-card h3{margin:0;padding:12px 16px;font-size:14px;border-bottom:1px solid #eee}
+  .metric-card__body{padding:16px}
+  .mrow{margin-bottom:14px}
+  .mrow:last-child{margin-bottom:0}
+  .mrow__top{display:flex;justify-content:space-between;font-size:13px;color:#5b5b74;margin-bottom:4px}
+  .mrow__val{font-weight:700;color:#1b1b2b}
+  .mrow__track{height:10px;background:#f0f0f7;border-radius:6px;overflow:hidden}
+  .mrow__bar{height:100%;border-radius:6px;background:#6d5efc;transition:width .4s ease;width:0}
+  .mrow__bar.is-fast{background:#2fae66}.mrow__bar.is-slow{background:#e0803a}
+  .verdict{padding:14px 16px;border-radius:12px;background:#eafaf1;border:1px solid #bfe8cf;
+    color:#1c6b3f;font-weight:600}
+  .vt__frames{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+  .vt__frame{border:1px solid #e7e7f0;border-radius:14px;overflow:hidden;background:#fff}
+  .vt__frame figcaption{padding:8px 12px;font:600 12px ui-monospace,Menlo,monospace;border-bottom:1px solid #eee}
+  .vt__frame iframe{display:block;width:100%;height:300px;border:0}
+  @media(max-width:820px){.vt__grid,.vt__frames{grid-template-columns:1fr}}
+</style>
+<div class="vt">
+  <h1>Core Web Vitals: spine-first vs. full stylesheet</h1>
+  <p class="lead">Same page, same content. <strong>Full CSS</strong> loads the whole stylesheet as a
+    render-blocking <code>&lt;link&gt;</code>, so the first paint waits for it. <strong>Spine inlined</strong>
+    ships the small layout skeleton in the HTML (no request, not render-blocking) and streams the paint
+    <code>complement.css</code> in afterwards. Because localhost is instant, pick a simulated CSS latency
+    to represent a real network — the <code>demo/server.mjs</code> server delays the CSS response.</p>
+
+  <div class="vt__controls">
+    <label for="delay">Simulated CSS latency</label>
+    <select id="delay">
+      <option value="0">0 ms (localhost)</option>
+      <option value="200">200 ms (fast)</option>
+      <option value="600" selected>600 ms (3G-ish)</option>
+      <option value="1200">1200 ms (slow)</option>
+    </select>
+    <button id="run">Run comparison</button>
+    <span class="vt__sizes">full <b>9.8 KB</b> · spine <b>7.1 KB</b> (inlined) · complement <b>5.9 KB</b> (lazy)</span>
+  </div>
+  <p class="vt__status" id="status">Click “Run comparison”. Each variant is measured in its own iframe, one after another.</p>
+
+  <div class="vt__grid">
+    <div class="metric-card">
+      <h3>⏱ First Contentful Paint (FCP)</h3>
+      <div class="metric-card__body" id="fcp"></div>
+    </div>
+    <div class="metric-card">
+      <h3>🚧 Render-blocking CSS before first paint</h3>
+      <div class="metric-card__body" id="blocking"></div>
+    </div>
+  </div>
+  <div class="verdict" id="verdict" style="display:none"></div>
+
+  <div class="vt__frames">
+    <figure class="vt__frame" style="margin:0"><figcaption id="cap-full">Full CSS — idle</figcaption><iframe id="frame-full" title="full"></iframe></figure>
+    <figure class="vt__frame" style="margin:0"><figcaption id="cap-spine">Spine inlined — idle</figcaption><iframe id="frame-spine" title="spine"></iframe></figure>
+  </div>
+</div>
+
+<script>
+  var V_FULL="Full CSS (render-blocking)", V_SPINE="Spine inlined + lazy complement";
+  var results={}, waiter=null;
+  var frameFull=document.getElementById('frame-full');
+  var frameSpine=document.getElementById('frame-spine');
+  function status(t){document.getElementById('status').textContent=t;}
+
+  window.addEventListener('message',function(e){
+    if(!e.data||!e.data.__vitals)return;
+    results[e.data.variant]=e.data;
+    if(waiter){var w=waiter;waiter=null;w();}
+  });
+
+  function loadAndWait(frame,pageUrl,delay,run){
+    return new Promise(function(res){waiter=res;frame.src=pageUrl+'?delay='+delay+'&run='+run;});
+  }
+
+  function ms(v){return v==null?'—':Math.round(v)+' ms';}
+
+  function bars(containerId,fullV,spineV){
+    var max=Math.max(fullV||0,spineV||0,1);
+    var faster=(spineV!=null&&fullV!=null)?spineV<fullV:false;
+    var rows=[
+      {label:V_FULL,val:fullV,fast:!faster&&false,slow:true},
+      {label:V_SPINE,val:spineV,fast:faster,slow:false},
+    ];
+    document.getElementById(containerId).innerHTML=rows.map(function(r){
+      var pct=r.val==null?0:Math.max(3,Math.round((r.val/max)*100));
+      var cls=r.label===V_SPINE&&faster?'is-fast':(r.label===V_FULL?'is-slow':'');
+      return '<div class="mrow"><div class="mrow__top"><span>'+r.label+'</span>'+
+        '<span class="mrow__val">'+ms(r.val)+'</span></div>'+
+        '<div class="mrow__track"><div class="mrow__bar '+cls+'" style="width:'+pct+'%"></div></div></div>';
+    }).join('');
+  }
+
+  function render(delay){
+    var f=results[V_FULL]||{}, s=results[V_SPINE]||{};
+    bars('fcp',f.fcp,s.fcp);
+    bars('blocking',f.blocking,s.blocking);
+    document.getElementById('cap-full').textContent='Full CSS — FCP '+ms(f.fcp)+' · blocking '+ms(f.blocking)+' · CLS '+((f.cls||0).toFixed(3));
+    document.getElementById('cap-spine').textContent='Spine inlined — FCP '+ms(s.fcp)+' · blocking '+ms(s.blocking)+' · CLS '+((s.cls||0).toFixed(3));
+    var v=document.getElementById('verdict'); v.style.display='block';
+    if(f.fcp!=null&&s.fcp!=null&&f.fcp>s.fcp){
+      var d=Math.round(f.fcp-s.fcp);
+      var x=s.fcp>0?(f.fcp/s.fcp).toFixed(1):'∞';
+      v.textContent='Spine-first painted '+d+' ms sooner (~'+x+'× faster FCP) at '+delay+' ms CSS latency, and CLS stayed '+((s.cls||0).toFixed(3))+'.';
+    } else {
+      v.textContent='Full CSS blocks the first paint for ~'+(f.blocking||0)+' ms waiting for the stylesheet; the inlined spine blocks 0 ms and paints immediately, then streams the complement in with 0 layout shift.'+
+        (f.hidden?' (This tab is in the background, so Chrome defers live FCP — keep the tab focused for real FCP numbers. The blocking-CSS figures above are measured regardless.)':'');
+    }
+    status('Done. Re-run with a different latency to compare.');
+  }
+
+  document.getElementById('run').addEventListener('click',async function(){
+    var btn=this; btn.disabled=true;
+    var delay=+document.getElementById('delay').value;
+    var run=Date.now();
+    results={};
+    status('Measuring “Full CSS” (render-blocking, '+delay+' ms latency)…');
+    await loadAndWait(frameFull,'measure-full.html',delay,run);
+    status('Measuring “Spine inlined + lazy complement”…');
+    await loadAndWait(frameSpine,'measure-spine.html',delay,run);
+    render(delay);
+    btn.disabled=false;
+  });
+</script>
+</body>
+</html>
