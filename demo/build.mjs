@@ -101,11 +101,6 @@ write(
     title: 'Spine only · postcss-spine demo',
     active: 'spine',
     head: '  <link rel="stylesheet" href="spine.css" />\n',
-    pre: `<div class="demo-note">Only <code>spine.css</code> is loaded — every box keeps its final
-size and position, but all paint (colors, backgrounds, shadows, radii, animations) is gone.</div>
-<style>.demo-note{padding:12px 20px;background:#fff7d6;border-bottom:1px solid #ece0a0;
-font:14px/1.5 system-ui;color:#5b520e}.demo-note code{font-weight:700}</style>
-`,
   }),
 )
 
