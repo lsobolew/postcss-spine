@@ -1,20 +1,21 @@
 /*
  * Render benchmark: loads each strategy many times in headless Chrome and
- * compares First Contentful Paint.
+ * compares First Contentful Paint. Both load their critical CSS over the
+ * network via a render-blocking <link> — a fair comparison, no inlining:
  *
- *   - Full CSS      : the whole stylesheet as a render-blocking <link>
- *   - Spine inlined : the layout skeleton inlined, complement loaded after load
+ *   - Full CSS   : the whole stylesheet blocks the first paint
+ *   - Spine-first: only spine.css blocks; complement.css is loaded non-blocking
  *
- * A local server (demo/server.mjs) delays the *CSS* response by a chosen amount
- * to represent a real network — the HTML document itself is never delayed, so
- * the only difference between the two runs is how the CSS is delivered.
+ * The server (demo/server.mjs) throttles each CSS response by
+ * `rtt + bytes / bandwidth`, so a smaller critical file paints sooner. The HTML
+ * document is never delayed.
  *
  * Headless pages report FCP normally (they count as visible), unlike a
  * backgrounded real tab where Chrome defers it.
  *
- * Usage:  node demo/bench.mjs [runs] [delayMs]
- *   e.g.  node demo/bench.mjs 1000 600
- *   defaults: runs=300, delayMs=200
+ * Usage:  node demo/bench.mjs [runs] [rttMs] [bandwidthKBps]
+ *   e.g.  node demo/bench.mjs 1000 170 180
+ *   defaults: runs=300, rtt=170 ms, bandwidth=180 KB/s (Fast 3G-ish)
  */
 import { existsSync } from 'node:fs'
 
@@ -23,7 +24,9 @@ import puppeteer from 'puppeteer-core'
 import { startDemoServer } from './server.mjs'
 
 const RUNS = Number(process.argv[2]) || 300
-const DELAY = process.argv[3] === undefined ? 200 : Number(process.argv[3])
+const RTT = process.argv[3] === undefined ? 170 : Number(process.argv[3])
+const BW_KBPS = process.argv[4] === undefined ? 180 : Number(process.argv[4])
+const BW = Math.round(BW_KBPS * 1024)
 const WARMUP = 3
 
 const CHROME =
@@ -44,7 +47,7 @@ if (!CHROME) {
 
 const VARIANTS = [
   { key: 'full', label: 'Full CSS (render-blocking <link>)', page: 'measure-full.html' },
-  { key: 'spine', label: 'Spine inlined + lazy complement', page: 'measure-spine.html' },
+  { key: 'spine', label: 'Spine-first (spine blocks, complement lazy)', page: 'measure-spine.html' },
 ]
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -60,7 +63,7 @@ function stats(arr) {
 }
 
 async function measure(page, origin, variant, run) {
-  await page.goto(`${origin}/${variant.page}?delay=${DELAY}&run=${run}`, {
+  await page.goto(`${origin}/${variant.page}?rtt=${RTT}&bw=${BW}&run=${run}`, {
     waitUntil: 'load',
     timeout: 30000,
   })
@@ -82,7 +85,7 @@ function printMetric(title, full, spine) {
   const f = stats(full)
   const s = stats(spine)
   console.log(`\n${title}`)
-  console.log('  metric        Full CSS (blocking)   Spine (inlined)')
+  console.log('  metric        Full CSS (blocking)   Spine-first')
   const line = (label, fv, sv) =>
     console.log('  ' + label.padEnd(12) + ms(fv) + ' ms       ' + ms(sv) + ' ms')
   if (!f || !s) {
@@ -104,7 +107,7 @@ function printMetric(title, full, spine) {
 
 console.log('\npostcss-spine render benchmark')
 console.log(
-  `runs=${RUNS} per variant (+${WARMUP} warmup discarded) · simulated CSS latency=${DELAY} ms · ${CHROME.split('/').pop()}`,
+  `runs=${RUNS} per variant (+${WARMUP} warmup discarded) · ${RTT} ms RTT, ${BW_KBPS} KB/s · ${CHROME.split('/').pop()}`,
 )
 
 const { server, origin } = await startDemoServer(0)

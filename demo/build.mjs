@@ -155,7 +155,7 @@ const MEASURE_SCRIPT = `(function(){
   try{new PerformanceObserver(function(l){l.getEntries().forEach(function(e){if(!e.hadRecentInput)cls+=e.value;});}).observe({type:'layout-shift',buffered:true});}catch(e){}
   function report(){
     var paint=performance.getEntriesByType('paint').filter(function(e){return e.name==='first-contentful-paint';})[0];
-    var css=performance.getEntriesByType('resource').filter(function(e){return e.name.indexOf('styles.css')>-1;});
+    var css=performance.getEntriesByType('resource').filter(function(e){return e.name.indexOf(window.__CRITICAL)>-1;});
     var blocking=css.reduce(function(m,e){return Math.max(m,e.responseEnd);},0);
     parent.postMessage({__vitals:true,variant:window.__VARIANT,
       fcp:paint?Math.round(paint.startTime):null,blocking:Math.round(blocking),
@@ -164,13 +164,13 @@ const MEASURE_SCRIPT = `(function(){
   window.addEventListener('load',function(){setTimeout(report,1000);});
 })();`
 
-const measurePage = ({ title, variant, head, post = '' }) => `<!doctype html>
+const measurePage = ({ title, variant, critical, head, post = '' }) => `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
-  <script>window.__VARIANT=${JSON.stringify(variant)};</script>
+  <script>window.__VARIANT=${JSON.stringify(variant)};window.__CRITICAL=${JSON.stringify(critical)};</script>
   <script>${MEASURE_SCRIPT}</script>
 ${head}</head>
 <body>
@@ -179,42 +179,43 @@ ${body}${post}
 </html>
 `
 
-// Full CSS: a render-blocking external stylesheet. The <link> is written during
-// head parsing so it blocks the first paint, and picks up the ?delay/?run query.
+// Full CSS: the whole stylesheet as a render-blocking <link>. Written during
+// head parsing so it blocks the first paint; the throttling query (rtt/bw/run)
+// is carried through verbatim from the iframe URL.
 write(
   'measure-full.html',
   measurePage({
     title: 'measure: full',
     variant: 'Full CSS (render-blocking)',
+    critical: 'styles.css',
     head: `  <script>
-    (function(){var p=new URLSearchParams(location.search);var d=p.get('delay')||'0';var r=p.get('run')||'0';
-    document.write('<link rel="stylesheet" href="styles.css?delay='+d+'&run='+r+'">');})();
+    document.write('<link rel="stylesheet" href="styles.css'+location.search+'">');
   </script>
 `,
   }),
 )
 
-// Spine inlined (no network, not render-blocking); complement fetched after load.
+// Spine-first: spine.css is a render-blocking <link> (so it pays a network
+// round-trip too — a fair comparison), and complement.css is loaded the
+// non-blocking "lazy CSS" way (media="print" flipped to "all" on load).
 write(
   'measure-spine.html',
   measurePage({
     title: 'measure: spine',
-    variant: 'Spine inlined + lazy complement',
-    head: `  <style>${spineCss}</style>
+    variant: 'Spine + lazy complement',
+    critical: 'spine.css',
+    head: `  <script>
+    var s=location.search;
+    document.write('<link rel="stylesheet" href="spine.css'+s+'">');
+    document.write('<link rel="stylesheet" href="complement.css'+s+'" media="print" onload="this.media=&#39;all&#39;">');
+  </script>
 `,
-    post: `
-<script>
-  window.addEventListener('load',function(){var p=new URLSearchParams(location.search);
-  var d=p.get('delay')||'0';var r=p.get('run')||'0';
-  requestAnimationFrame(function(){var l=document.createElement('link');l.rel='stylesheet';
-  l.href='complement.css?delay='+d+'&run='+r;document.head.appendChild(l);});});
-</script>`,
   }),
 )
 
 // --- vitals.html: the Core Web Vitals comparison ----------------------------
 const V_FULL = 'Full CSS (render-blocking)'
-const V_SPINE = 'Spine inlined + lazy complement'
+const V_SPINE = 'Spine + lazy complement'
 const vitalsBody = `<style>
   .vt{max-width:1120px;margin:0 auto;padding:32px 24px 64px;font:16px/1.6 system-ui,sans-serif;color:#1b1b2b}
   .vt h1{font-size:32px;letter-spacing:-.02em;margin:0 0 8px}
@@ -250,23 +251,24 @@ const vitalsBody = `<style>
 </style>
 <div class="vt">
   <h1>Core Web Vitals: spine-first vs. full stylesheet</h1>
-  <p class="lead">Same page, same content. <strong>Full CSS</strong> loads the whole stylesheet as a
-    render-blocking <code>&lt;link&gt;</code>, so the first paint waits for it. <strong>Spine inlined</strong>
-    ships the small layout skeleton in the HTML (no request, not render-blocking) and streams the paint
-    <code>complement.css</code> in afterwards. Real networks aren't instant, so pick a simulated CSS
-    latency — a <a href="sw.js"><code>service worker</code></a> delays the CSS response in the browser,
-    which works on static hosting (GitHub Pages) too.</p>
+  <p class="lead">Same page, same content — both load their critical CSS over the network via a
+    render-blocking <code>&lt;link&gt;</code> (no inlining, so it's a fair fight). <strong>Full CSS</strong>
+    blocks the first paint on the whole stylesheet; <strong>spine-first</strong> blocks only on the smaller
+    <code>spine.css</code> and loads <code>complement.css</code> the non-blocking "lazy CSS" way
+    (<code>media="print"</code> → <code>onload="this.media='all'"</code>). A
+    <a href="sw.js"><code>service worker</code></a> throttles each stylesheet by
+    <code>rtt + bytes / bandwidth</code>, so a smaller critical file paints sooner — and it works on static
+    hosting (GitHub Pages) with no server. The win scales with how much paint CSS you defer.</p>
 
   <div class="vt__controls">
-    <label for="delay">Simulated CSS latency</label>
-    <select id="delay">
-      <option value="0">0 ms (localhost)</option>
-      <option value="200">200 ms (fast)</option>
-      <option value="600" selected>600 ms (3G-ish)</option>
-      <option value="1200">1200 ms (slow)</option>
+    <label for="conn">Connection</label>
+    <select id="conn">
+      <option value="300:51200">Slow 3G — 300 ms RTT, 50 KB/s</option>
+      <option value="170:184320" selected>Fast 3G — 170 ms RTT, 180 KB/s</option>
+      <option value="70:1228800">4G — 70 ms RTT, 1.2 MB/s</option>
     </select>
     <button id="run">Run comparison</button>
-    <span class="vt__sizes">full <b>${kb(SIZE.full)}</b> · spine <b>${kb(SIZE.spine)}</b> (inlined) · complement <b>${kb(SIZE.complement)}</b> (lazy)</span>
+    <span class="vt__sizes">critical: full <b>${kb(SIZE.full)}</b> vs spine <b>${kb(SIZE.spine)}</b> · complement <b>${kb(SIZE.complement)}</b> deferred</span>
   </div>
   <p class="vt__status" id="status">Click “Run comparison”. Each variant is measured in its own iframe, one after another.</p>
 
@@ -276,7 +278,7 @@ const vitalsBody = `<style>
       <div class="metric-card__body" id="fcp"></div>
     </div>
     <div class="metric-card">
-      <h3>🚧 Render-blocking CSS before first paint</h3>
+      <h3>🚧 Critical CSS ready (render-blocking)</h3>
       <div class="metric-card__body" id="blocking"></div>
     </div>
   </div>
@@ -284,7 +286,7 @@ const vitalsBody = `<style>
 
   <div class="vt__frames">
     <figure class="vt__frame" style="margin:0"><figcaption id="cap-full">Full CSS — idle</figcaption><iframe id="frame-full" title="full"></iframe></figure>
-    <figure class="vt__frame" style="margin:0"><figcaption id="cap-spine">Spine inlined — idle</figcaption><iframe id="frame-spine" title="spine"></iframe></figure>
+    <figure class="vt__frame" style="margin:0"><figcaption id="cap-spine">Spine-first — idle</figcaption><iframe id="frame-spine" title="spine"></iframe></figure>
   </div>
 </div>
 
@@ -301,8 +303,8 @@ const vitalsBody = `<style>
     if(waiter){var w=waiter;waiter=null;w();}
   });
 
-  function loadAndWait(frame,pageUrl,delay,run){
-    return new Promise(function(res){waiter=res;frame.src=pageUrl+'?delay='+delay+'&run='+run;});
+  function loadAndWait(frame,pageUrl,query){
+    return new Promise(function(res){waiter=res;frame.src=pageUrl+query;});
   }
 
   function ms(v){return v==null?'—':Math.round(v)+' ms';}
@@ -323,22 +325,22 @@ const vitalsBody = `<style>
     }).join('');
   }
 
-  function render(delay){
+  function render(label){
     var f=results[V_FULL]||{}, s=results[V_SPINE]||{};
     bars('fcp',f.fcp,s.fcp);
     bars('blocking',f.blocking,s.blocking);
-    document.getElementById('cap-full').textContent='Full CSS — FCP '+ms(f.fcp)+' · blocking '+ms(f.blocking)+' · CLS '+((f.cls||0).toFixed(3));
-    document.getElementById('cap-spine').textContent='Spine inlined — FCP '+ms(s.fcp)+' · blocking '+ms(s.blocking)+' · CLS '+((s.cls||0).toFixed(3));
+    document.getElementById('cap-full').textContent='Full CSS — FCP '+ms(f.fcp)+' · critical '+ms(f.blocking)+' · CLS '+((f.cls||0).toFixed(3));
+    document.getElementById('cap-spine').textContent='Spine-first — FCP '+ms(s.fcp)+' · critical '+ms(s.blocking)+' · CLS '+((s.cls||0).toFixed(3));
     var v=document.getElementById('verdict'); v.style.display='block';
+    var bd=Math.round((f.blocking||0)-(s.blocking||0));
     if(f.fcp!=null&&s.fcp!=null&&f.fcp>s.fcp){
       var d=Math.round(f.fcp-s.fcp);
-      var x=s.fcp>0?(f.fcp/s.fcp).toFixed(1):'∞';
-      v.textContent='Spine-first painted '+d+' ms sooner (~'+x+'× faster FCP) at '+delay+' ms CSS latency, and CLS stayed '+((s.cls||0).toFixed(3))+'.';
+      v.textContent='On '+label+', spine-first painted '+d+' ms sooner: only the smaller spine.css blocks the first paint, and the paint complement is deferred (media=print → onload). CLS stayed '+((s.cls||0).toFixed(3))+'.';
     } else {
-      v.textContent='Full CSS blocks the first paint for ~'+(f.blocking||0)+' ms waiting for the stylesheet; the inlined spine blocks 0 ms and paints immediately, then streams the complement in with 0 layout shift.'+
-        (f.hidden?' (This tab is in the background, so Chrome defers live FCP — keep the tab focused for real FCP numbers. The blocking-CSS figures above are measured regardless.)':'');
+      v.textContent='On '+label+', the render-blocking critical CSS was ready in '+ms(f.blocking)+' (full) vs '+ms(s.blocking)+' (spine-first) — spine blocks on a smaller file and defers the paint complement, so it paints ~'+bd+' ms sooner. CLS 0.'+
+        (f.hidden?' (This tab is in the background, so Chrome defers live FCP — keep it focused for real FCP; the critical-CSS figures are measured regardless.)':'');
     }
-    status('Done. Re-run with a different latency to compare.');
+    status('Done. Re-run or pick another connection to compare.');
   }
 
   var runBtn=document.getElementById('run');
@@ -349,27 +351,31 @@ const vitalsBody = `<style>
     runBtn.disabled=true;
     status('Registering the latency service worker…');
     navigator.serviceWorker.register('sw.js').then(function(){
-      function ready(){ runBtn.disabled=false; status('Ready — pick a latency and run the comparison.'); }
+      function ready(){ runBtn.disabled=false; status('Ready — pick a connection and run the comparison.'); }
       if(navigator.serviceWorker.controller) ready();
       else navigator.serviceWorker.addEventListener('controllerchange', ready);
     }).catch(function(){
       runBtn.disabled=false;
-      status('Service worker unavailable — latency will not be simulated.');
+      status('Service worker unavailable — the connection will not be throttled.');
     });
   } else {
-    status('No service worker support here — latency will not be simulated.');
+    status('No service worker support here — the connection will not be throttled.');
   }
 
   runBtn.addEventListener('click',async function(){
     runBtn.disabled=true;
-    var delay=+document.getElementById('delay').value;
+    var sel=document.getElementById('conn');
+    var parts=sel.value.split(':');
+    var rtt=parts[0], bw=parts[1];
+    var label=sel.options[sel.selectedIndex].text.split(' — ')[0];
     var run=Date.now();
+    var query='?rtt='+rtt+'&bw='+bw+'&run='+run;
     results={};
-    status('Measuring “Full CSS” (render-blocking, '+delay+' ms latency)…');
-    await loadAndWait(frameFull,'measure-full.html',delay,run);
-    status('Measuring “Spine inlined + lazy complement”…');
-    await loadAndWait(frameSpine,'measure-spine.html',delay,run);
-    render(delay);
+    status('Measuring “Full CSS” (render-blocking whole stylesheet)…');
+    await loadAndWait(frameFull,'measure-full.html',query);
+    status('Measuring “Spine-first” (spine blocks, complement lazy)…');
+    await loadAndWait(frameSpine,'measure-spine.html',query);
+    render(label);
     runBtn.disabled=false;
   });
 </script>`

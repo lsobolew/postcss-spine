@@ -1,10 +1,11 @@
 /*
  * Tiny static server for the demo that can simulate network latency.
  *
- * Any request with a `?delay=<ms>` query is held for that many milliseconds
- * before responding — used by vitals.html / bench.mjs to make render-blocking
- * CSS behave like it would over a real connection (localhost is otherwise
- * instant).
+ * A `.css` request with `?rtt=<ms>` and/or `?bw=<bytes-per-second>` is held to
+ * reproduce a real connection — `delay = rtt + (fileBytes / bw) * 1000` — so a
+ * smaller stylesheet arrives sooner. Used by bench.mjs (vitals.html uses the
+ * sw.js service worker instead, so it works on static hosting). The HTML
+ * document is never delayed.
  *
  * Run:  npm run demo:serve   →  http://127.0.0.1:8124/
  */
@@ -47,11 +48,16 @@ export function createDemoServer() {
       return
     }
 
-    // Latency is simulated for the (render-blocking) CSS only — never for the
-    // HTML document itself, otherwise every variant's navigation would be
-    // delayed equally and the comparison would be meaningless.
+    // Throttle the (render-blocking) CSS only — never the HTML document, else
+    // every variant's navigation would be delayed equally.
     const ext = extname(filePath)
-    const delay = ext === '.css' ? Math.min(Number(url.searchParams.get('delay')) || 0, 10000) : 0
+    let delay = 0
+    if (ext === '.css') {
+      const rtt = Math.min(Number(url.searchParams.get('rtt')) || 0, 10000)
+      const bw = Number(url.searchParams.get('bw')) || 0 // bytes/sec, 0 = unthrottled
+      const transfer = bw > 0 ? (body.length / bw) * 1000 : 0
+      delay = Math.min(rtt + transfer, 20000)
+    }
     const send = () => {
       res.writeHead(200, {
         'Content-Type': TYPES[ext] || 'application/octet-stream',

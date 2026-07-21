@@ -34,18 +34,21 @@ reload; **Max reflow (layout)** (measured with transform-independent `offset*`
 metrics) and **Browser CLS** both stay at 0 — the spine already locked in the
 geometry, so the complement is a pure repaint.
 
-`vitals.html` measures each strategy in its own iframe:
+`vitals.html` measures each strategy in its own iframe. Both load their critical
+CSS over the network via a render-blocking `<link>` — **no inlining, a fair
+comparison**:
 
-- **Full CSS** loads the whole stylesheet as a render-blocking `<link>`, so the
-  first paint waits for it.
-- **Spine inlined** ships the small layout skeleton in the HTML (no request, not
-  render-blocking) and streams `complement.css` in after load.
+- **Full CSS** blocks the first paint on the whole stylesheet.
+- **Spine-first** blocks only on the smaller `spine.css` and loads
+  `complement.css` the non-blocking "lazy CSS" way
+  (`media="print"` → `onload="this.media='all'"`).
 
-Pick a **simulated CSS latency** and hit **Run comparison**. Localhost (and a
-static host) is instant, so the `sw.js` service worker delays the CSS response
-in the browser — the stylesheet request still blocks rendering, so this works on
-GitHub Pages with no server. It reports **First Contentful Paint**, the
-**render-blocking-CSS** time that explains the FCP gap, and **CLS**.
+Pick a **connection** and hit **Run comparison**. The `sw.js` service worker
+throttles each stylesheet by `rtt + bytes / bandwidth` in the browser (so it
+works on GitHub Pages with no server), which means a smaller critical file
+paints sooner. It reports **First Contentful Paint**, the **critical-CSS-ready**
+time that explains the gap, and **CLS**. The win is proportional to how much
+paint CSS gets deferred — see [`bench-results.md`](./bench-results.md).
 
 > **Note:** Chrome defers FCP for a page that starts in a background tab, so keep
 > the tab focused for real FCP numbers. The render-blocking-CSS figure is derived

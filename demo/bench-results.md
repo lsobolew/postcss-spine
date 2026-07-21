@@ -3,51 +3,59 @@
 Representative output of `npm run demo:bench` (see [`bench.mjs`](./bench.mjs)).
 Numbers are machine- and load-dependent — re-run to reproduce on your hardware.
 
-- **Date:** 2026-07-20
+- **Date:** 2026-07-21
 - **Method:** headless Chrome (system Chrome via `puppeteer-core`), each variant
-  loaded repeatedly, warm-up runs discarded, variants interleaved. Only the CSS
-  response is delayed (never the HTML), so the sole difference is how the CSS is
-  delivered. First Contentful Paint is read from the Paint Timing API.
+  loaded repeatedly, warm-up runs discarded, variants interleaved. This is a
+  **fair comparison** — both variants load their critical CSS over the network
+  via a render-blocking `<link>` (no inlining). Each CSS response is throttled by
+  `rtt + bytes / bandwidth`, so a smaller critical file arrives sooner. The HTML
+  document is never delayed. First Contentful Paint is read from the Paint
+  Timing API.
 - **Both variants render identical content.**
 
-## 1000 runs per variant · 200 ms simulated CSS latency
+## 150 runs per variant · Fast 3G (170 ms RTT, 180 KB/s)
 
 ```
-node demo/bench.mjs 1000 200
+node demo/bench.mjs 150 170 180
 ```
 
-| FCP metric | Full CSS (render-blocking `<link>`) | Spine (inlined) |
-| ---------- | ----------------------------------: | --------------: |
-| median     |                            244.0 ms |         44.0 ms |
-| mean       |                            246.1 ms |         47.6 ms |
-| p95        |                            264.0 ms |         68.0 ms |
-| min        |                            232.0 ms |         32.0 ms |
-| max        |                            752.0 ms |        312.0 ms |
-| std dev    |                             22.9 ms |         15.7 ms |
-| samples    |                                1000 |             995 |
+Critical CSS on the render-blocking path: full `styles.css` **9.8 KB** vs
+spine `spine.css` **7.1 KB**; `complement.css` **5.9 KB** is loaded non-blocking
+(`media="print"` → `onload="this.media='all'"`).
 
-**Spine painted 200.0 ms sooner at the median — ~5.5× faster FCP.**
+| FCP metric | Full CSS (render-blocking) | Spine-first |
+| ---------- | -------------------------: | ----------: |
+| median     |                   264.0 ms |    244.0 ms |
+| mean       |                   263.4 ms |    246.9 ms |
+| p95        |                   268.0 ms |    256.0 ms |
+| min        |                   256.0 ms |    240.0 ms |
+| max        |                   280.0 ms |    300.0 ms |
+| std dev    |                     3.6 ms |      6.2 ms |
+| samples    |                        150 |         150 |
+
+**Spine-first painted ~20 ms sooner at the median.**
 
 ## Reading the numbers
 
-- The **median gap (~200 ms) equals the simulated CSS latency.** The full
-  stylesheet blocks the first paint until it downloads; the inlined spine ships
-  in the HTML and paints immediately (~44 ms is just parse + layout), then
-  streams `complement.css` in afterwards with zero layout shift.
-- Spine is also **more consistent** (lower std dev, p95 68 ms vs 264 ms) because
-  its first paint does not depend on the network.
-- The saving scales with real latency — higher latency, larger gap. Even at
-  `0 ms` latency the spine still avoids one render-blocking request round-trip.
-- `995` spine samples: a few runs did not emit an FCP entry (occasional headless
-  noise) and were dropped; it does not affect the medians.
+- Both variants pay one render-blocking request with the same RTT, so the FCP
+  gap comes purely from **critical-CSS size**: the full stylesheet is 9.8 KB, the
+  spine is 7.1 KB. The ~2.7 KB the spine defers is ~20 ms at 180 KB/s — which is
+  the measured gap.
+- The win is **proportional to how much paint CSS you defer**. This demo's CSS is
+  layout-heavy (the spine is ~72 % of the whole), so the gap is modest. A
+  paint-heavy site (large color/shadow/animation layer) defers far more, so the
+  spine is a small fraction of the critical path and the FCP win is much larger.
+- Inlining the spine instead of loading it over the network removes the request
+  entirely and widens the gap further, but that's a separate optimisation — this
+  benchmark keeps both on an equal `<link>` footing to isolate the size effect.
 - LCP is omitted — headless Chrome does not report it.
 
 ## Reproduce
 
 ```bash
-npm run demo:build            # regenerate the demo pages
-npm run demo:bench            # defaults: 300 runs, 200 ms latency
-node demo/bench.mjs 1000 600  # 1000 runs at 600 ms latency
+npm run demo:build                 # regenerate the demo pages
+npm run demo:bench                 # defaults: 300 runs, 170 ms RTT, 180 KB/s
+node demo/bench.mjs 1000 300 50     # 1000 runs on Slow 3G (300 ms, 50 KB/s)
 ```
 
 Set `PUPPETEER_EXECUTABLE_PATH` if your Chrome/Chromium is not auto-detected.

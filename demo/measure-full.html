@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>measure: full</title>
-  <script>window.__VARIANT="Full CSS (render-blocking)";</script>
+  <script>window.__VARIANT="Full CSS (render-blocking)";window.__CRITICAL="styles.css";</script>
   <script>(function(){
   var cls=0;
   try{new PerformanceObserver(function(l){l.getEntries().forEach(function(e){if(!e.hadRecentInput)cls+=e.value;});}).observe({type:'layout-shift',buffered:true});}catch(e){}
   function report(){
     var paint=performance.getEntriesByType('paint').filter(function(e){return e.name==='first-contentful-paint';})[0];
-    var css=performance.getEntriesByType('resource').filter(function(e){return e.name.indexOf('styles.css')>-1;});
+    var css=performance.getEntriesByType('resource').filter(function(e){return e.name.indexOf(window.__CRITICAL)>-1;});
     var blocking=css.reduce(function(m,e){return Math.max(m,e.responseEnd);},0);
     parent.postMessage({__vitals:true,variant:window.__VARIANT,
       fcp:paint?Math.round(paint.startTime):null,blocking:Math.round(blocking),
@@ -19,8 +19,7 @@
   window.addEventListener('load',function(){setTimeout(report,1000);});
 })();</script>
   <script>
-    (function(){var p=new URLSearchParams(location.search);var d=p.get('delay')||'0';var r=p.get('run')||'0';
-    document.write('<link rel="stylesheet" href="styles.css?delay='+d+'&run='+r+'">');})();
+    document.write('<link rel="stylesheet" href="styles.css'+location.search+'">');
   </script>
 </head>
 <body>
