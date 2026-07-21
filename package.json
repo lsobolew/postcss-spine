@@ -1,6 +1,6 @@
 {
   "name": "postcss-spine",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "PostCSS plugin that splits CSS into a layout-affecting \"spine\" and a paint-only \"complement\", so the spine locks in element dimensions and the rest only repaints.",
   "keywords": [
     "postcss",

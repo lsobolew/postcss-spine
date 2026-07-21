@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/lsobolew/postcss-spine/compare/v0.1.0...v0.2.0) (2026-07-21)
+
+
+### Features
+
+* add removeEmpty option to drop rules left empty after stripping ([e2bb94b](https://github.com/lsobolew/postcss-spine/commit/e2bb94b4b7eed868a60b137f208ce2ebcf48f898))
+
 # Changelog
 
 All notable changes to this project are documented in this file. The format is
