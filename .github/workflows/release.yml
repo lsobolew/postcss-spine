@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+# semantic-release pushes the release commit/tag, creates the GitHub release and
+# comments on issues/PRs; `id-token: write` lets npm authenticate to the
+# registry via OIDC trusted publishing — no NPM_TOKEN required.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Gated by a repo variable so this doesn't fire before the npm trusted
+    # publisher is configured (see RELEASING.md). Set Actions variable
+    # RELEASE_ENABLED=true to turn releases on. Also skipped on forks.
+    if: github.repository == 'lsobolew/postcss-spine' && vars.RELEASE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # semantic-release needs full history + tags
+          persist-credentials: false # let semantic-release manage git auth
+
+      # Note: do NOT set registry-url here — it writes an .npmrc that conflicts
+      # with semantic-release's OIDC authentication.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # OIDC trusted publishing requires npm >= 11.5.1.
+      - name: Ensure recent npm
+        run: npm install -g npm@latest
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

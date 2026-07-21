@@ -154,6 +154,13 @@ npm test            # Vitest
 npm run build       # tsup — dual ESM + CJS bundle with type declarations
 ```
 
+## Releases
+
+Automated with [semantic-release](https://semantic-release.gitbook.io/) on every
+push to `master`, publishing to npm via [trusted publishing (OIDC)](https://docs.npmjs.com/trusted-publishers)
+— no tokens. Commit with [Conventional Commits](https://www.conventionalcommits.org/).
+See [RELEASING.md](./RELEASING.md) for the setup and workflow.
+
 ## License
 
 [MIT](./LICENSE) © Łukasz Sobolewski
