@@ -292,6 +292,10 @@ const vitalsBody = `<style>
   .mrow__bar.is-fast{background:#2fae66}.mrow__bar.is-slow{background:#e0803a}
   .verdict{padding:14px 16px;border-radius:12px;background:#eafaf1;border:1px solid #bfe8cf;
     color:#1c6b3f;font-weight:600}
+  .metric-card button{padding:10px 18px;border:0;border-radius:999px;cursor:pointer;
+    font:600 14px system-ui;color:#fff;background:#6d5efc}
+  .metric-card button:disabled{opacity:.5;cursor:default}
+  .metric-card code{background:#f0f0f7;padding:2px 6px;border-radius:6px;font-size:.9em}
   .vt__frames{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
   .vt__frame{border:1px solid #e7e7f0;border-radius:14px;overflow:hidden;background:#fff}
   .vt__frame figcaption{padding:8px 12px;font:600 12px ui-monospace,Menlo,monospace;border-bottom:1px solid #eee}
@@ -337,7 +341,21 @@ const vitalsBody = `<style>
     <figure class="vt__frame" style="margin:0"><figcaption id="cap-full">Full CSS — idle</figcaption><iframe id="frame-full" title="full"></iframe></figure>
     <figure class="vt__frame" style="margin:0"><figcaption id="cap-spine">Spine-first — idle</figcaption><iframe id="frame-spine" title="spine"></iframe></figure>
   </div>
+
+  <div class="metric-card" style="margin-top:24px">
+    <h3>🧮 Main-thread render cost (measured live)</h3>
+    <div class="metric-card__body">
+      <p style="margin:0 0 12px;font-size:14px;color:#5b5b74">Applies each stylesheet to a hidden 600-tile
+        grid and times the forced <strong>style recalculation</strong>. A web page can't read paint duration
+        or throttle its own CPU (those are DevTools features) — for the paint cost (~3× cheaper) and
+        CPU-throttled numbers run <code>npm run demo:bench:render 20 heavy 6</code>, recorded in
+        <a href="bench-results.md">bench-results.md</a>.</p>
+      <button id="rc-run">Measure style recalc</button>
+      <div id="rc-out" style="margin-top:14px"></div>
+    </div>
+  </div>
 </div>
+<div id="rc-stage" aria-hidden="true" style="position:absolute;left:-99999px;top:0;width:1240px;contain:layout"></div>
 
 <script>
   var V_FULL=${JSON.stringify(V_FULL)}, V_SPINE=${JSON.stringify(V_SPINE)};
@@ -345,6 +363,51 @@ const vitalsBody = `<style>
   var frameFull=document.getElementById('frame-full');
   var frameSpine=document.getElementById('frame-spine');
   function status(t){document.getElementById('status').textContent=t;}
+
+  function median(a){var s=a.slice().sort(function(x,y){return x-y;});var m=Math.floor(s.length/2);
+    return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+
+  // In-page micro-benchmark: cost of applying each stylesheet (style recalc +
+  // layout) to a hidden 600-tile grid. Paint / CPU throttling need the CLI.
+  document.getElementById('rc-run').addEventListener('click',async function(){
+    var btn=this; btn.disabled=true;
+    var out=document.getElementById('rc-out'); out.textContent='Measuring…';
+    var stage=document.getElementById('rc-stage');
+    var tiles=''; for(var i=0;i<600;i++) tiles+='<div class="tile t'+(i%12)+'"><span class="tile__label">Item '+(i+1)+'</span></div>';
+    stage.innerHTML='<div class="heavy"><div class="heavy__grid">'+tiles+'</div></div>';
+    var full,spine;
+    try{
+      full=await fetch('heavy.css').then(function(r){return r.text();});
+      spine=await fetch('heavy-spine.css').then(function(r){return r.text();});
+    }catch(e){ out.textContent='Could not load the stylesheets.'; btn.disabled=false; return; }
+    var probe=stage.querySelector('.tile');
+    var sf=document.createElement('style'); sf.textContent=full; sf.disabled=true; document.head.appendChild(sf);
+    var ss=document.createElement('style'); ss.textContent=spine; ss.disabled=true; document.head.appendChild(ss);
+    // Read a non-layout computed property to flush style recalc WITHOUT forcing
+    // layout, so the (identical) layout cost doesn't mask the recalc difference.
+    function measure(el){
+      el.disabled=true; void getComputedStyle(probe).color;   // baseline recalc, flush
+      var t=performance.now();
+      el.disabled=false; void getComputedStyle(probe).color;  // apply -> style recalc
+      var dt=performance.now()-t;
+      el.disabled=true;
+      return dt;
+    }
+    for(var w=0;w<8;w++){ measure(sf); measure(ss); }   // warm up
+    var ff=[],sp=[];
+    for(var k=0;k<40;k++){ ff.push(measure(sf)); sp.push(measure(ss)); }
+    sf.remove(); ss.remove(); stage.innerHTML='';
+    var mf=median(ff), msp=median(sp), max=Math.max(mf,msp,0.001);
+    function bar(label,v,cls){var pct=Math.max(4,Math.round(v/max*100));
+      return '<div class="mrow"><div class="mrow__top"><span>'+label+'</span><span class="mrow__val">'+v.toFixed(3)+' ms</span></div>'+
+        '<div class="mrow__track"><div class="mrow__bar '+cls+'" style="width:'+pct+'%"></div></div></div>';}
+    var note = mf-msp>Math.max(0.02,mf*0.05)
+      ? 'spine '+((mf-msp)*1000).toFixed(0)+' µs cheaper — fewer declarations to apply'
+      : 'within noise here — recalc is dominated by selector matching, and both stylesheets share the same selectors';
+    out.innerHTML=bar('Full CSS',mf,'is-slow')+bar('Spine',msp,'is-fast')+
+      '<p style="margin:8px 0 0;font-size:13px;color:#5b5b74">style recalculation per apply (600 tiles), median of 40 · '+note+'</p>';
+    btn.disabled=false;
+  });
 
   window.addEventListener('message',function(e){
     if(!e.data||!e.data.__vitals)return;
