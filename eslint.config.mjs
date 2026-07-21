@@ -20,6 +20,7 @@ export default tseslint.config(
         URL: 'readonly',
         setTimeout: 'readonly',
         performance: 'readonly',
+        Buffer: 'readonly',
       },
     },
   },

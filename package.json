@@ -61,6 +61,7 @@
     "demo:build": "npm run build && node demo/build.mjs",
     "demo:serve": "node demo/server.mjs",
     "demo:bench": "node demo/bench.mjs",
+    "demo:bench:render": "node demo/bench-render.mjs",
     "release": "semantic-release",
     "release:dry": "semantic-release --dry-run --no-ci",
     "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build"

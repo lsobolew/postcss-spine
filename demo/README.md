@@ -71,9 +71,11 @@ two variants, discards warm-up runs, and prints median / mean / p95 / min / max
 / std-dev plus the median speed-up. Set `PUPPETEER_EXECUTABLE_PATH` if Chrome is
 not auto-detected. LCP is skipped (headless Chrome does not report it).
 
-A representative run is recorded in [`bench-results.md`](./bench-results.md):
-at 200 ms CSS latency over 1000 runs, FCP median was **244 ms (full) vs. 44 ms
-(spine)** — spine painted ~5.5× sooner.
+`npm run demo:bench:render` additionally traces the first render's **Recalculate
+Style + Paint** main-thread cost. Representative runs are recorded in
+[`bench-results.md`](./bench-results.md) — including the honest finding that, on
+this small page, the recalc/paint difference is within noise (the win is on the
+network/critical path), and why.
 
 ## Rebuild
 
