@@ -258,8 +258,9 @@ const vitalsBody = `<style>
   <p class="lead">Same page, same content. <strong>Full CSS</strong> loads the whole stylesheet as a
     render-blocking <code>&lt;link&gt;</code>, so the first paint waits for it. <strong>Spine inlined</strong>
     ships the small layout skeleton in the HTML (no request, not render-blocking) and streams the paint
-    <code>complement.css</code> in afterwards. Because localhost is instant, pick a simulated CSS latency
-    to represent a real network — the <code>demo/server.mjs</code> server delays the CSS response.</p>
+    <code>complement.css</code> in afterwards. Real networks aren't instant, so pick a simulated CSS
+    latency — a <a href="sw.js"><code>service worker</code></a> delays the CSS response in the browser,
+    which works on static hosting (GitHub Pages) too.</p>
 
   <div class="vt__controls">
     <label for="delay">Simulated CSS latency</label>
@@ -345,8 +346,27 @@ const vitalsBody = `<style>
     status('Done. Re-run with a different latency to compare.');
   }
 
-  document.getElementById('run').addEventListener('click',async function(){
-    var btn=this; btn.disabled=true;
+  var runBtn=document.getElementById('run');
+
+  // The service worker adds the CSS latency in the browser, so it must be
+  // controlling the page before a run — otherwise the delay wouldn't apply.
+  if('serviceWorker' in navigator){
+    runBtn.disabled=true;
+    status('Registering the latency service worker…');
+    navigator.serviceWorker.register('sw.js').then(function(){
+      function ready(){ runBtn.disabled=false; status('Ready — pick a latency and run the comparison.'); }
+      if(navigator.serviceWorker.controller) ready();
+      else navigator.serviceWorker.addEventListener('controllerchange', ready);
+    }).catch(function(){
+      runBtn.disabled=false;
+      status('Service worker unavailable — latency will not be simulated.');
+    });
+  } else {
+    status('No service worker support here — latency will not be simulated.');
+  }
+
+  runBtn.addEventListener('click',async function(){
+    runBtn.disabled=true;
     var delay=+document.getElementById('delay').value;
     var run=Date.now();
     results={};
@@ -355,7 +375,7 @@ const vitalsBody = `<style>
     status('Measuring “Spine inlined + lazy complement”…');
     await loadAndWait(frameSpine,'measure-spine.html',delay,run);
     render(delay);
-    btn.disabled=false;
+    runBtn.disabled=false;
   });
 </script>`
 writeFileSync(

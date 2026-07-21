@@ -5,16 +5,19 @@ The same marketing landing page, split by `postcss-spine` into a layout
 
 ## View it
 
-Most pages are static, but the Web Vitals page needs the bundled server to
-simulate network latency. Run:
+Live: **<https://lsobolew.github.io/postcss-spine/>** (deployed from `master` via
+GitHub Pages). There the Web Vitals latency is simulated by a service worker
+(`sw.js`), so it works without a server.
+
+To run locally:
 
 ```bash
 npm run demo:build   # regenerate the demo (also builds the plugin)
 npm run demo:serve   # http://127.0.0.1:8124/
 ```
 
-(`npx serve demo` or `python3 -m http.server -d demo` also work for everything
-except the latency simulation on the vitals page.)
+(`npx serve demo` or `python3 -m http.server -d demo` also work — the vitals
+latency is handled by the `sw.js` service worker, not the server.)
 
 ## The pages
 
@@ -38,10 +41,11 @@ geometry, so the complement is a pure repaint.
 - **Spine inlined** ships the small layout skeleton in the HTML (no request, not
   render-blocking) and streams `complement.css` in after load.
 
-Pick a **simulated CSS latency** (the `server.mjs` server delays the CSS
-response, since localhost is otherwise instant) and hit **Run comparison**. It
-reports **First Contentful Paint**, the **render-blocking-CSS** time that
-explains the FCP gap, and **CLS**.
+Pick a **simulated CSS latency** and hit **Run comparison**. Localhost (and a
+static host) is instant, so the `sw.js` service worker delays the CSS response
+in the browser — the stylesheet request still blocks rendering, so this works on
+GitHub Pages with no server. It reports **First Contentful Paint**, the
+**render-blocking-CSS** time that explains the FCP gap, and **CLS**.
 
 > **Note:** Chrome defers FCP for a page that starts in a background tab, so keep
 > the tab focused for real FCP numbers. The render-blocking-CSS figure is derived

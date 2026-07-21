@@ -51,6 +51,13 @@ deferring the visual styling, without any layout shift when it arrives.
 }
 ```
 
+## Live demo
+
+**<https://lsobolew.github.io/postcss-spine/>** — the same landing page as full
+CSS, spine-only (identical geometry, no paint), spine + lazy-loaded complement
+(toggle it, zero layout shift), and a Core Web Vitals comparison (FCP under
+simulated CSS latency). See [`demo/`](./demo) to run it locally.
+
 [PostCSS]: https://github.com/postcss/postcss
 [ci-img]: https://github.com/lsobolew/postcss-spine/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/lsobolew/postcss-spine/actions/workflows/ci.yml

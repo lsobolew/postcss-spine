@@ -23,6 +23,18 @@ export default tseslint.config(
       },
     },
   },
+  // Service worker (demo latency simulation).
+  {
+    files: ['demo/sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        fetch: 'readonly',
+        setTimeout: 'readonly',
+        URL: 'readonly',
+      },
+    },
+  },
   // Browser demo client script.
   {
     files: ['demo/assets/**/*.js'],
