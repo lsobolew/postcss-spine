@@ -164,7 +164,7 @@ const MEASURE_SCRIPT = `(function(){
   window.addEventListener('load',function(){setTimeout(report,1000);});
 })();`
 
-const measurePage = ({ title, variant, critical, head, post = '' }) => `<!doctype html>
+const measurePage = ({ title, variant, critical, head, post = '', bodyHtml = body }) => `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -174,7 +174,7 @@ const measurePage = ({ title, variant, critical, head, post = '' }) => `<!doctyp
   <script>${MEASURE_SCRIPT}</script>
 ${head}</head>
 <body>
-${body}${post}
+${bodyHtml}${post}
 </body>
 </html>
 `
@@ -207,9 +207,58 @@ write(
     head: `  <script>
     var s=location.search;
     document.write('<link rel="stylesheet" href="spine.css'+s+'">');
-    document.write('<link rel="stylesheet" href="complement.css'+s+'" media="print" onload="this.media=&#39;all&#39;">');
+    if(s.indexOf('nolazy')===-1)
+      document.write('<link rel="stylesheet" href="complement.css'+s+'" media="print" onload="this.media=&#39;all&#39;">');
   </script>
 `,
+  }),
+)
+
+// --- paint-heavy pages (for the render-cost benchmark) ----------------------
+// A large grid of gradient/shadow tiles. In the spine, the tiles keep their
+// size but paint (almost) nothing, so the first paint has far less to draw.
+const heavySource = read('heavy.css')
+const heavySpineCss = (await postcss([spine()]).process(heavySource, { from: undefined })).css
+const heavyComplementCss = (
+  await postcss([spine({ mode: 'complement' })]).process(heavySource, { from: undefined })
+).css
+write('heavy-spine.css', heavySpineCss)
+write('heavy-complement.css', heavyComplementCss)
+
+const heavyTiles = Array.from(
+  { length: 600 },
+  (_, i) => `<div class="tile t${i % 12}"><span class="tile__label">Item ${i + 1}</span></div>`,
+).join('')
+const heavyBody = `<main class="heavy"><div class="heavy__grid">${heavyTiles}</div></main>`
+
+write(
+  'measure-heavy-full.html',
+  measurePage({
+    title: 'measure: heavy full',
+    variant: 'Full CSS (render-blocking)',
+    critical: 'heavy.css',
+    head: `  <script>
+    document.write('<link rel="stylesheet" href="heavy.css'+location.search+'">');
+  </script>
+`,
+    bodyHtml: heavyBody,
+  }),
+)
+
+write(
+  'measure-heavy-spine.html',
+  measurePage({
+    title: 'measure: heavy spine',
+    variant: 'Spine + lazy complement',
+    critical: 'heavy-spine.css',
+    head: `  <script>
+    var s=location.search;
+    document.write('<link rel="stylesheet" href="heavy-spine.css'+s+'">');
+    if(s.indexOf('nolazy')===-1)
+      document.write('<link rel="stylesheet" href="heavy-complement.css'+s+'" media="print" onload="this.media=&#39;all&#39;">');
+  </script>
+`,
+    bodyHtml: heavyBody,
   }),
 )
 

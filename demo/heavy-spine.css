@@ -1,0 +1,56 @@
+/* ------------------------------------------------------------------ *
+ * Paint-heavy stylesheet for the render-cost benchmark.
+ *
+ * A large grid of tiles, each with gradients, multiple box-shadows, a
+ * gradient pseudo-element overlay, rounded corners and text-shadow. The
+ * layout (grid, sizes, spacing) is modest; almost all the cost is paint.
+ * postcss-spine strips the paint into the complement, leaving the spine as
+ * plain sized boxes that paint (almost) nothing.
+ * ------------------------------------------------------------------ */
+
+.heavy {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.heavy__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+
+.tile {
+  position: relative;
+  height: 120px;
+  padding: 14px;
+  border: 1px solid;
+  overflow: hidden;
+}
+
+/* A second gradient layer per tile — more paint work, no layout impact. */
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.tile__label {
+  position: relative;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.t0 { }
+.t1 { }
+.t2 { }
+.t3 { }
+.t4 { }
+.t5 { }
+.t6 { }
+.t7 { }
+.t8 { }
+.t9 { }
+.t10 { }
+.t11 { }

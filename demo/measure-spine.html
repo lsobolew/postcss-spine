@@ -21,7 +21,8 @@
   <script>
     var s=location.search;
     document.write('<link rel="stylesheet" href="spine.css'+s+'">');
-    document.write('<link rel="stylesheet" href="complement.css'+s+'" media="print" onload="this.media=&#39;all&#39;">');
+    if(s.indexOf('nolazy')===-1)
+      document.write('<link rel="stylesheet" href="complement.css'+s+'" media="print" onload="this.media=&#39;all&#39;">');
   </script>
 </head>
 <body>

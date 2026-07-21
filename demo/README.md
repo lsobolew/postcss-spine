@@ -71,11 +71,18 @@ two variants, discards warm-up runs, and prints median / mean / p95 / min / max
 / std-dev plus the median speed-up. Set `PUPPETEER_EXECUTABLE_PATH` if Chrome is
 not auto-detected. LCP is skipped (headless Chrome does not report it).
 
-`npm run demo:bench:render` additionally traces the first render's **Recalculate
-Style + Paint** main-thread cost. Representative runs are recorded in
-[`bench-results.md`](./bench-results.md) — including the honest finding that, on
-this small page, the recalc/paint difference is within noise (the win is on the
-network/critical path), and why.
+`npm run demo:bench:render` traces the first render's **Recalculate Style +
+Paint** main-thread cost. It takes `[runs] [scenario] [cpuThrottle]`:
+
+```bash
+node demo/bench-render.mjs 30 heavy 1   # paint-heavy grid, desktop CPU
+node demo/bench-render.mjs 20 heavy 6   # 6x CPU slowdown (mid-tier mobile)
+```
+
+On the small landing page the difference is within noise, but on the paint-heavy
+`heavy` scenario the spine paints ~3× cheaper — and the saving grows on a
+throttled CPU (~11 ms/render at 6×). Numbers and analysis in
+[`bench-results.md`](./bench-results.md).
 
 ## Rebuild
 

@@ -1,0 +1,66 @@
+/* ------------------------------------------------------------------ *
+ * Paint-heavy stylesheet for the render-cost benchmark.
+ *
+ * A large grid of tiles, each with gradients, multiple box-shadows, a
+ * gradient pseudo-element overlay, rounded corners and text-shadow. The
+ * layout (grid, sizes, spacing) is modest; almost all the cost is paint.
+ * postcss-spine strips the paint into the complement, leaving the spine as
+ * plain sized boxes that paint (almost) nothing.
+ * ------------------------------------------------------------------ */
+
+.heavy {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.heavy__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+
+.tile {
+  position: relative;
+  height: 120px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #eef, #dde);
+  box-shadow:
+    0 1px 2px rgba(20, 20, 40, 0.1),
+    0 10px 24px rgba(80, 60, 200, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: #1b1b2b;
+}
+
+/* A second gradient layer per tile — more paint work, no layout impact. */
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 20% 0%, rgba(255, 255, 255, 0.55), transparent 60%);
+  opacity: 0.7;
+}
+
+.tile__label {
+  position: relative;
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.t0 { background: linear-gradient(135deg, #f6d365, #fda085); box-shadow: 0 12px 30px rgba(253, 160, 133, 0.45); }
+.t1 { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); box-shadow: 0 12px 30px rgba(161, 196, 253, 0.45); }
+.t2 { background: linear-gradient(135deg, #d4fc79, #96e6a1); box-shadow: 0 12px 30px rgba(150, 230, 161, 0.45); }
+.t3 { background: linear-gradient(135deg, #84fab0, #8fd3f4); box-shadow: 0 12px 30px rgba(143, 211, 244, 0.45); }
+.t4 { background: linear-gradient(135deg, #fccb90, #d57eeb); box-shadow: 0 12px 30px rgba(213, 126, 235, 0.45); }
+.t5 { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); box-shadow: 0 12px 30px rgba(142, 197, 252, 0.45); }
+.t6 { background: linear-gradient(135deg, #f093fb, #f5576c); box-shadow: 0 12px 30px rgba(245, 87, 108, 0.45); }
+.t7 { background: linear-gradient(135deg, #5ee7df, #b490ca); box-shadow: 0 12px 30px rgba(180, 144, 202, 0.45); }
+.t8 { background: linear-gradient(135deg, #c79081, #dfa579); box-shadow: 0 12px 30px rgba(223, 165, 121, 0.45); }
+.t9 { background: linear-gradient(135deg, #fddb92, #d1fdff); box-shadow: 0 12px 30px rgba(209, 253, 255, 0.45); }
+.t10 { background: linear-gradient(135deg, #9890e3, #b1f4cf); box-shadow: 0 12px 30px rgba(152, 144, 227, 0.45); }
+.t11 { background: linear-gradient(135deg, #96fbc4, #f9f586); box-shadow: 0 12px 30px rgba(249, 245, 134, 0.45); }
