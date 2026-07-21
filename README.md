@@ -106,9 +106,10 @@ single `postcss.config.js`. For example, as npm scripts:
 
 ## Options
 
-| Option | Type                       | Default   | Description                                                                                     |
-| ------ | -------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
-| `mode` | `'spine' \| 'complement'` | `'spine'` | `'spine'` keeps only layout-affecting declarations; `'complement'` keeps only the paint half. |
+| Option        | Type                      | Default   | Description                                                                                     |
+| ------------- | ------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `mode`        | `'spine' \| 'complement'` | `'spine'` | `'spine'` keeps only layout-affecting declarations; `'complement'` keeps only the paint half.   |
+| `removeEmpty` | `boolean`                 | `false`   | Remove rules and at-rules (e.g. `@media`) left empty after stripping. `@keyframes`/`@font-face` are never removed. |
 
 ## How declarations are classified
 
@@ -142,7 +143,8 @@ by their unprefixed name.
   unless it is a recognised width (`<length>`, `thin`/`medium`/`thick`,
   `calc()`/`min()`/`max()`/`clamp()`) or style keyword. An ambiguous
   `var(--x)` inside a `border` value is therefore classified as a color.
-- Empty rules left behind after stripping declarations are not removed.
+- Empty rules left behind after stripping declarations are kept by default; set
+  `removeEmpty: true` to drop them.
 
 ## Contributing
 

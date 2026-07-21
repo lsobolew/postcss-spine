@@ -116,6 +116,33 @@ describe('complement mode — keeps paint, drops layout', () => {
   })
 })
 
+describe('removeEmpty option', () => {
+  it('leaves empty rules in place by default', async () => {
+    expect(await run('a { color: red }')).toBe('a { }')
+  })
+
+  it('removes rules left empty after stripping', async () => {
+    expect(await run('a { color: red }', { removeEmpty: true })).toBe('')
+  })
+
+  it('keeps rules that still have declarations', async () => {
+    expect(await run('a { width: 10px; color: red }', { removeEmpty: true })).toBe('a { width: 10px }')
+  })
+
+  it('removes an @media block that became empty', async () => {
+    expect(await run('@media (min-width: 600px) { a { color: red } }', { removeEmpty: true })).toBe('')
+  })
+
+  it('keeps an @media block that still has content', async () => {
+    const css = '@media (min-width: 600px) { a { width: 10px; color: red } }'
+    expect(await run(css, { removeEmpty: true })).toBe('@media (min-width: 600px) { a { width: 10px } }')
+  })
+
+  it('works in complement mode too', async () => {
+    expect(await run('a { width: 10px }', { mode: 'complement', removeEmpty: true })).toBe('')
+  })
+})
+
 describe('spine + complement round trip', () => {
   it('together preserve every declaration of a border shorthand', async () => {
     const input = 'a { border: 2px dashed green }'

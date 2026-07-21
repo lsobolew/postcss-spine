@@ -13,6 +13,13 @@ export interface SpineOptions {
    *   dropped. Loading it after the spine repaints the page without any reflow.
    */
   mode?: SpineMode
+
+  /**
+   * Remove rules (and at-rules such as `@media`) that are left empty after their
+   * declarations were stripped. Off by default, so the rule structure is
+   * preserved. `@keyframes` / `@font-face` are never removed by this.
+   */
+  removeEmpty?: boolean
 }
 
 const PLUGIN_NAME = 'postcss-spine'
@@ -90,6 +97,7 @@ function handleDeclaration(decl: Declaration, keepNonLayout: boolean): void {
  */
 const postcssSpine = (opts: SpineOptions = {}): Plugin => {
   const keepNonLayout = (opts.mode ?? 'spine') === 'complement'
+  const removeEmpty = opts.removeEmpty === true
 
   return {
     postcssPlugin: PLUGIN_NAME,
@@ -102,6 +110,19 @@ const postcssSpine = (opts: SpineOptions = {}): Plugin => {
       if (!keepNonLayout && KEYFRAMES_RE.test(unprefixed(atRule.name))) {
         atRule.remove()
       }
+    },
+    OnceExit(root) {
+      if (!removeEmpty) return
+      // Rules first (an at-rule may only become empty once its rules are gone),
+      // then non-preserved at-rules like @media.
+      root.walkRules((rule) => {
+        if (rule.nodes.length === 0) rule.remove()
+      })
+      root.walkAtRules((atRule) => {
+        const name = unprefixed(atRule.name).toLowerCase()
+        if (name === 'font-face' || KEYFRAMES_RE.test(name)) return
+        if (atRule.nodes && atRule.nodes.length === 0) atRule.remove()
+      })
     },
   }
 }
